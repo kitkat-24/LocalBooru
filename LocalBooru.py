@@ -19,8 +19,6 @@ long_opt = "help add= search artist= character= rating= series= tags".split(" ")
 Data = namedtuple('Data', 'artist character rating series tags')
 
 
-
-
 def save_index(obj):
     with open('data/index.pkl', 'wb') as f:
         pickle.dump(obj, f, pickle.HIGHEST_PROTOCOL)
@@ -29,11 +27,12 @@ def load_index():
     with open('data/index.pkl', 'rb') as f:
         return pickle.load(f)
 
-
 try:
     index = load_index()
 except FileNotFoundError:
     index = {} # No existing index
+
+################################################################################
 
 def add(inputfile, opts, tags):
     """Add a file to the database.
@@ -55,8 +54,6 @@ def add(inputfile, opts, tags):
         tags=set()
     )
 
-
-
 def search(opts, tags):
     """Search the database.
 
@@ -73,28 +70,43 @@ def search(opts, tags):
 
     return results
 
+################################################################################
 
+def main(args):
+    help_str = 'LocalBooru.py [-A]|[-S [filename]] -a <artist> -c <character> -r <rating> -s <series> <tag1 tag2 ...>'
 
-def main(argv):
     try:
-        opts, args = getopt.getopt(argv, short_opt, long_opt)
+        opts, args = getopt.gnu_getopt(args, short_opt, long_opt)
     except getopt.GetoptError:
-        print('LocalBooru.py -A|-S [filename] -a <artist> -c <character> -r <rating> -s <series> -t <tag1,tag2,...>')
+        print(help_str)
         sys.exit(2)
 
-    print(str(index))
-
+    # Parse input
+    tags = []
+    print(opts)
     for opt, arg in opts:
         if opt == '-h':
-            print('LocalBooru.py -A|-S [filename] -a <artist> -c <character> -r <rating> -s <series> -t <tag1,tag2,...>')
+            print(help_str)
             sys.exit()
         elif opt in ("-A", "--add"):
-            add(arg, opts[1:], args)
+            operation = 'add'
+            filename = arg
         elif opt in ("-S", "--search"):
-            search(argv[1:])
+            operation = 'search'
+        elif opt in ("-a", "--artist"):
+            tags.append(f'artist:{arg}')
+        elif opt in ("-c", "--character"):
+            tags.append(f'character:{arg}')
+        elif opt in ("-r", "--rating"):
+            tags.append(f'rating:{arg}')
+        elif opt in ("-s", "--series"):
+            tags.append(f'series:{arg}')
 
-    print('Input file is {}'.format(inputfile))
-    print('Output file is {}'.format(outputfile))
+    # Append all tags (non-specific args; get_opt removes all used options and
+    # arguments from the argument list it is passed).
+    tags = tags + args
+    print(tags)
+
 
 if __name__ == "__main__":
     main(sys.argv[1:])
