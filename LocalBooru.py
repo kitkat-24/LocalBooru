@@ -10,6 +10,9 @@ import uuid
 
 from collections import namedtuple
 
+import logging
+logging.basicConfig(level=logging.DEBUG)
+
 
 # Tags are expected as arguments IFF if the -t flag is given
 short_opt = "hA:Sa:c:r:s:t"
@@ -19,45 +22,46 @@ long_opt = "help add= search artist= character= rating= series= tags".split(" ")
 Data = namedtuple('Data', 'artist character rating series tags')
 
 
-def save_index(obj):
-    with open('data/index.pkl', 'wb') as f:
+def save_obj(name, obj):
+    with open(f'data/{name}.pkl', 'wb') as f:
         pickle.dump(obj, f, pickle.HIGHEST_PROTOCOL)
 
-def load_index():
-    with open('data/index.pkl', 'rb') as f:
+def load_obj(name):
+    with open(f'data/{name}.pkl', 'rb') as f:
         return pickle.load(f)
 
+# Load database
 try:
-    index = load_index()
+    file_index = load_obj('file_index')
 except FileNotFoundError:
-    index = {} # No existing index
+    file_index = {} # No existing index
+
+try:
+    tag_list = load_obj('tag_list')
+except FileNotFoundError:
+    tag_list = set() # No existing tag list
 
 ################################################################################
 
-def add(inputfile, opts, tags):
+def add(inputfile, tags):
     """Add a file to the database.
 
     :param inputfile: Path to file to add.
-    :param opts: File fields to add.
-    :param tags: Tags to add.
+    :param tags: Tags for the file.
 
     :returns: Nothing.
     """
-    outputfile = str(uuid.uuid4())
-    shutil.copy2(inputfile, 'data/' + outputfile)
+    file_id = str(uuid.uuid4())
+    shutil.copy2(inputfile, 'data/' + file_id)
 
-    obj_data = Data(
-        artist='',
-        character='',
-        rating='',
-        series='',
-        tags=set()
-    )
+    file_index[file_id] = tags
+    for tag in tags:
+        tag_list.add(tag)
+    logging.info(f'Created file "{file_id}"')
 
-def search(opts, tags):
+def search(tags):
     """Search the database.
 
-    :param opts: File fields to search by.
     :param tags: Tags to search by.
 
     :returns: Nothing.
@@ -83,7 +87,6 @@ def main(args):
 
     # Parse input
     tags = []
-    print(opts)
     for opt, arg in opts:
         if opt == '-h':
             print(help_str)
@@ -104,8 +107,16 @@ def main(args):
 
     # Append all tags (non-specific args; get_opt removes all used options and
     # arguments from the argument list it is passed).
-    tags = tags + args
+    tags = set(tags + args)
+    print(operation)
+    if filename: print(filename)
     print(tags)
+
+    # Perform DB operation
+    if operation == 'add':
+        add(filename, tags)
+    elif operation == 'search':
+        search(tags)
 
 
 if __name__ == "__main__":
