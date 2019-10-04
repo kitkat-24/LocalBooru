@@ -108,9 +108,13 @@ def search(tags):
         if tag in tag_list:
             sets.append(set(tag_list[tag]))
 
-    results = set.intersection(*sets)
-    pp.pprint(results)
-    return results
+    if sets:
+        results = set.intersection(*sets)
+        pp.pprint(results)
+        return results
+    else:
+        print('No files tagged with "{}" found.'.format(" ".join(sorted(tags))))
+        return None
 
 ################################################################################
 
