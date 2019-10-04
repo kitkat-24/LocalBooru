@@ -14,13 +14,13 @@ from collections import namedtuple
 import logging
 logging.basicConfig(level=logging.DEBUG)
 
+import pprint
+pp = pprint.PrettyPrinter(indent=4)
+
 
 # Tags are expected as arguments IFF if the -t flag is given
-short_opt = "hA:Sa:c:r:s:t"
-long_opt = "help add= search artist= character= rating= series= tags".split(" ")
-
-# Info tuple for each image
-Data = namedtuple('Data', 'artist character rating series tags')
+short_opt = "hA:LR:Sa:c:r:s:"
+long_opt = "help add= list remove= search artist= character= rating= series=".split(" ")
 
 
 def save_obj(name, obj):
@@ -38,7 +38,7 @@ try:
     shutil.copy2('data/file_index.pkl', 'data/file_index.pkl.backup')
     logging.info('Backed up file_index')
 except FileNotFoundError:
-    file_index = {} # No existing index
+    file_index = dict() # No existing index
 
 try:
     tag_list = load_obj('tag_list')
@@ -46,7 +46,7 @@ try:
     shutil.copy2('data/tag_list.pkl', 'data/tag_list.pkl.backup')
     logging.info('Backed up tag_list')
 except FileNotFoundError:
-    tag_list = set() # No existing tag list
+    tag_list = dict() # No existing tag list
 
 ################################################################################
 
@@ -64,28 +64,58 @@ def add(inputfile, tags):
     tags.add(f'fid:{file_id}')
     file_index[file_id] = tags
     for tag in tags:
-        tag_list.add(tag)
+        if tag in tag_list:
+            tag_list[tag].append(file_id)
+        else:
+            tag_list[tag] = [file_id]
+
     logging.info(f'Created file "{file_id}"')
+
+def list_tags():
+    """List all tags in the database by printing to stdout.
+
+    :returns: Nothing.
+    """
+    for tag in sorted(tag_list.keys()):
+        print('{}: {}'.format(tag, len(tag_list[tag])))
+
+def remove(fid):
+    """Remove an image from the database. If the file is not in the database,
+    the method does nothing.
+
+    :param fid: The uuid of the file to remove.
+
+    :returns: Nothing.
+    """
+    # Returns file_index[fid] or None if fid is not in file_index.
+    rm_tags = file_index.pop(fid, None)
+    if rm_tags:
+        logging.info('Removing file "{}".'.format(fid))
+        for tag in rm_tags:
+            tag_list[tag].remove(fid)
+    else:
+        logging.info('File "{}" not found.'.format(fid))
 
 def search(tags):
     """Search the database.
 
     :param tags: Set of tags to search by.
 
-    :returns: Nothing.
+    :returns: Set of file_ids for files that have all listed tags.
     """
-    results = set()
+    sets = []
     for tag in tags:
-        for image in index:
-            if tag in image.tags:
-                results.add(image)
+        if tag in tag_list:
+            sets.append(set(tag_list[tag]))
 
+    results = set.intersection(*sets)
+    pp.pprint(results)
     return results
 
 ################################################################################
 
 def main(args):
-    help_str = 'LocalBooru.py [-A]|[-S [filename]] -a <artist> -c <character> -r <rating> -s <series> <tag1 tag2 ...>'
+    help_str = 'LocalBooru.py [-A] | [-L] | [-R uuid] | [-S filename]  -a <artist> -c <character> -r <rating> -s <series> <tag1 tag2 ...>'
 
     try:
         opts, args = getopt.gnu_getopt(args, short_opt, long_opt)
@@ -102,6 +132,11 @@ def main(args):
         elif opt in ("-A", "--add"):
             operation = 'add'
             filename = arg
+        elif opt in ("-L", "--list"):
+            operation = 'list'
+        elif opt in ("-R", "--remove"):
+            operation = 'remove'
+            fid = arg
         elif opt in ("-S", "--search"):
             operation = 'search'
         elif opt in ("-a", "--artist"):
@@ -113,13 +148,17 @@ def main(args):
         elif opt in ("-s", "--series"):
             tags.append(f'series:{arg}')
 
-    # Append all tags (non-specific args; get_opt removes all used options and
-    # arguments from the argument list it is passed).
-    tags = set(tags + args)
 
     # Perform DB operation
     if operation == 'add':
+        # Append all tags (non-specific args; get_opt removes all used options
+        # and arguments from the argument list it is passed).
+        tags = set(tags + args)
         add(filename, tags)
+    elif operation == 'list':
+        list_tags()
+    elif operation == 'remove':
+        remove(fid)
     elif operation == 'search':
         search(tags)
 
