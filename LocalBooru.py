@@ -77,7 +77,9 @@ def list_tags():
     :returns: Nothing.
     """
     for tag in sorted(tag_list.keys()):
-        print('{}: {}'.format(tag, len(tag_list[tag])))
+        # Don't print out every unique file id
+        if not 'fid:' in tag:
+            print('{}: {}'.format(tag, len(tag_list[tag])))
 
 def remove(fid):
     """Remove an image from the database. If the file is not in the database,
@@ -119,7 +121,7 @@ def search(tags):
 ################################################################################
 
 def main(args):
-    help_str = 'LocalBooru.py [-A] | [-L] | [-R uuid] | [-S filename]  -a <artist> -c <character> -r <rating> -s <series> <tag1 tag2 ...>'
+    help_str = 'LocalBooru.py [-A filename] | [-L] | [-R uuid] | [-S]  -a <artist> -c <character> -r <rating> -s <series> <tag1 tag2 ...>'
 
     try:
         opts, args = getopt.gnu_getopt(args, short_opt, long_opt)
@@ -152,12 +154,12 @@ def main(args):
         elif opt in ("-s", "--series"):
             tags.append(f'series:{arg}')
 
+    # Append all tags (non-specific args; get_opt removes all used options
+    # and arguments from the argument list it is passed).
+    tags = set(tags + args)
 
     # Perform DB operation
     if operation == 'add':
-        # Append all tags (non-specific args; get_opt removes all used options
-        # and arguments from the argument list it is passed).
-        tags = set(tags + args)
         add(filename, tags)
     elif operation == 'list':
         list_tags()
