@@ -110,13 +110,18 @@ def search(tags):
 
     :returns: Set of file_ids for files that have all listed tags.
     """
-    sets = []
-    for tag in tags:
-        if tag in tag_list:
-            sets.append(set(tag_list[tag]))
+    results = set()
+    if not tags:
+        results = set(file_index.keys())
+    else:
+        for tag in tags:
+            if tag in tag_list:
+                if results:
+                    results &= set(tag_list[tag])
+                else:
+                    results = set(tag_list[tag])
 
-    if sets:
-        results = set.intersection(*sets)
+    if results:
         pp.pprint(results)
         return results
     else:
