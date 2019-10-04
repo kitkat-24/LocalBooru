@@ -93,8 +93,13 @@ def remove(fid):
     rm_tags = file_index.pop(fid, None)
     if rm_tags:
         logging.info('Removing file "{}".'.format(fid))
+        os.remove(f'data/{fid}')
         for tag in rm_tags:
             tag_list[tag].remove(fid)
+            # If the image was the last one with the given tag, purge the tag
+            # from the database.
+            if not tag_list[tag]:
+                del tag_list[tag]
     else:
         logging.info('File "{}" not found.'.format(fid))
 
