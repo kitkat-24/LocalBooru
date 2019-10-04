@@ -2,6 +2,7 @@
 # To add an image:
 # python3 LocalBooru.py -a path/to/file.png -artist Bob -character susie -rating safe -series generic_show -tags female clothed cute
 
+import atexit
 import getopt
 import pickle
 import shutil
@@ -33,11 +34,17 @@ def load_obj(name):
 # Load database
 try:
     file_index = load_obj('file_index')
+    logging.info('Loaded file_index')
+    shutil.copy2('data/file_index.pkl', 'data/file_index.pkl.backup')
+    logging.info('Backed up file_index')
 except FileNotFoundError:
     file_index = {} # No existing index
 
 try:
     tag_list = load_obj('tag_list')
+    logging.info('Loaded tag_list')
+    shutil.copy2('data/tag_list.pkl', 'data/tag_list.pkl.backup')
+    logging.info('Backed up tag_list')
 except FileNotFoundError:
     tag_list = set() # No existing tag list
 
@@ -47,13 +54,14 @@ def add(inputfile, tags):
     """Add a file to the database.
 
     :param inputfile: Path to file to add.
-    :param tags: Tags for the file.
+    :param tags: Set of tags for the file.
 
     :returns: Nothing.
     """
     file_id = str(uuid.uuid4())
     shutil.copy2(inputfile, 'data/' + file_id)
 
+    tags.add(f'fid:{file_id}')
     file_index[file_id] = tags
     for tag in tags:
         tag_list.add(tag)
@@ -62,7 +70,7 @@ def add(inputfile, tags):
 def search(tags):
     """Search the database.
 
-    :param tags: Tags to search by.
+    :param tags: Set of tags to search by.
 
     :returns: Nothing.
     """
@@ -108,9 +116,6 @@ def main(args):
     # Append all tags (non-specific args; get_opt removes all used options and
     # arguments from the argument list it is passed).
     tags = set(tags + args)
-    print(operation)
-    if filename: print(filename)
-    print(tags)
 
     # Perform DB operation
     if operation == 'add':
@@ -119,5 +124,12 @@ def main(args):
         search(tags)
 
 
+def exit_handler():
+    save_obj('file_index', file_index)
+    save_obj('tag_list', tag_list)
+    logging.info('Saved updated indices')
+
+
 if __name__ == "__main__":
+    atexit.register(exit_handler)
     main(sys.argv[1:])
