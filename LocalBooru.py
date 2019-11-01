@@ -40,6 +40,7 @@ try:
     logging.info('Backed up file_index')
 except FileNotFoundError:
     file_index = dict() # No existing index
+    logging.info('file_index not found. Created new one.')
 
 try:
     tag_list = load_obj('tag_list')
@@ -48,6 +49,7 @@ try:
     logging.info('Backed up tag_list')
 except FileNotFoundError:
     tag_list = dict() # No existing tag list
+    logging.info('tag_list not found. Created new one.')
 
 ################################################################################
 
@@ -131,7 +133,16 @@ def search(tags):
 
 ################################################################################
 
-def main(args):
+def parse_args(args):
+    """
+    Parses input arguments.
+
+    :param args: List of commandline arguments.
+
+    :returns: Tuple (operation, tags)
+        operation: string denoting the operation
+        tags: set of tags
+    """
     help_str = 'LocalBooru.py [-A filename] | [-L] | [-R uuid] | [-S]  -a <artist> -c <character> -r <rating> -s <series> <tag1 tag2 ...>'
 
     try:
@@ -140,7 +151,6 @@ def main(args):
         print(help_str)
         sys.exit(2)
 
-    # Parse input
     tags = []
     for opt, arg in opts:
         if opt == '-h':
@@ -169,15 +179,32 @@ def main(args):
     # and arguments from the argument list it is passed).
     tags = set(tags + args)
 
-    # Perform DB operation
+    return operation, tags
+
+def call_operation(operation, tags):
+    """
+    Calls the appropriate operation.
+
+    :param operation: A string with the name of the operation.
+    :param tags: A set of the tags for the operation.
+
+    :returns: The result of the operation.
+    """
     if operation == 'add':
-        add(filename, tags)
+        return add(filename, tags)
     elif operation == 'list':
-        list_tags()
+        return list_tags()
     elif operation == 'remove':
-        remove(fid)
+        return remove(fid)
     elif operation == 'search':
-        search(tags)
+        return search(tags)
+
+
+
+def main(args):
+    operation, tags = parse_args(args)
+    return call_operation(operation, tags)
+
 
 
 def exit_handler():
@@ -185,7 +212,7 @@ def exit_handler():
     save_obj('tag_list', tag_list)
     logging.info('Saved updated indices')
 
+atexit.register(exit_handler)
 
 if __name__ == "__main__":
-    atexit.register(exit_handler)
     main(sys.argv[1:])
