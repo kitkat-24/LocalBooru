@@ -153,6 +153,7 @@ def parse_args(args):
 
     operation = None
     tags = []
+    filename = ''
     for opt, arg in opts:
         if opt == '-h':
             print(help_str)
@@ -180,9 +181,9 @@ def parse_args(args):
     # and arguments from the argument list it is passed).
     tags = set(tags + args)
 
-    return operation, tags
+    return operation, tags, filename
 
-def call_operation(operation, tags):
+def call_operation(operation, tags, filename=''):
     """
     Calls the appropriate operation.
 
@@ -192,7 +193,11 @@ def call_operation(operation, tags):
     :returns: The result of the operation.
     """
     if operation == 'add':
-        return add(filename, tags)
+        if filename:
+            return add(filename, tags)
+        else:
+            print('Invalid filename specified.')
+            sys.exit(2)
     elif operation == 'list':
         return list_tags()
     elif operation == 'remove':
@@ -203,8 +208,8 @@ def call_operation(operation, tags):
 
 
 def main(args):
-    operation, tags = parse_args(args)
-    return call_operation(operation, tags)
+    operation, tags, filename = parse_args(args)
+    return call_operation(operation, tags, filename)
 
 
 
