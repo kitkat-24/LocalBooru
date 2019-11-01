@@ -1,2 +1,4 @@
 # Ignore images
 data
+# And compiled stuff
+__pycache__

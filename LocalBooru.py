@@ -151,6 +151,7 @@ def parse_args(args):
         print(help_str)
         sys.exit(2)
 
+    operation = None
     tags = []
     for opt, arg in opts:
         if opt == '-h':
