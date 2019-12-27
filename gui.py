@@ -1,51 +1,34 @@
-import PySimpleGUI as sg
-from PIL import Image
+import sys
+from PyQt5.QtWidgets import QApplication, QWidget, QLabel
+from PyQt5.QtGui import QIcon, QPixmap
 
 import LocalBooru as lb
 
 
-max_size = (800, 800)
+class App(QWidget):
 
-layout = [
-    [sg.Text('Search the database and display results')],
-    [sg.Input(key='-IN-')],
-    [sg.Button('Enter'), sg.Exit()],
-    [sg.Image(filename='data/localbooru_bg.gif', key='im1', visible=True, enable_events=True)]
-]
+    def __init__(self):
+        super().__init__()
+        self.title = 'LocalBooru'
+        self.left = 10
+        self.top = 10
+        self.width = 640
+        self.height = 480
+        self.initUI()
 
-window = sg.Window('LocalBooru', layout)
+    def initUI(self):
+        self.setWindowTitle(self.title)
+        self.setGeometry(self.left, self.top, self.width, self.height)
 
-while True:
-    event, values = window.Read()
-    print(event, values)
+        # Create widget
+        label = QLabel(self)
+        pixmap = QPixmap('image.png')
+        label.setPixmap(pixmap)
+        self.resize(pixmap.width(),pixmap.height())
 
-    if event in (None, 'Exit'):
-        break
-    elif event == 'Enter':
-        operation, tags, filename = lb.parse_args(['--search', values['-IN-']])
-        print(operation, tags)
-        if operation == 'search':
-            fids = lb.search(tags)
-            print(fids)
+        self.showMaximized()
 
-            if fids:
-                #for fid in fids:
-                #    with Image.open(f'data/{fid}') as img:
-                #        if
-                fid = fids.pop()
-                with Image.open(f'data/{fid}') as img:
-                    thmb = img.copy()
-                    thmb.thumbnail((128, 128))
-                    filename = 'data/tmp/im1.gif'
-                    thmb.save(filename)
-                    window['im1'].Update(filename=filename, size=thmb.size, visible=True)
-    elif event == 'im1':
-        with Image.open(f'data/{fid}') as img:
-            filename = 'data/tmp/im1.gif'
-            img.thumbnail(max_size)
-            img.save(filename)
-            window['im1'].Update(filename=filename, size=img.size, visible=True)
-
-
-window.Close()
-
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    ex = App()
+    sys.exit(app.exec_())
