@@ -1,25 +1,36 @@
 import sys
-from PyQt5.QtWidgets import QApplication, QWidget, QLabel
+from collections import namedtuple
+from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QLabel
 from PyQt5.QtGui import QIcon, QPixmap
 from PyQt5 import QtCore
 
 import LocalBooru as lb
 
+Dimension = namedtuple('Dimension', 'w h')
+thumbnail = Dimension(100, 100)
 
-class App(QWidget):
+
+class LBmain(QMainWindow):
     def __init__(self, qapp):
         super().__init__()
         self.title = 'LocalBooru'
         self.qapp = qapp
-        #self.left = 10
-        #self.top = 10
-        #self.width = 640
-        #self.height = 480
         self.initUI()
 
     def initUI(self):
+        # Create menubar
+        aboutAct = QAction(QIcon('exit.png'), 'About',self)
+        aboutAct.setStatusTip("About the app")
+        menubar = self.menuBar()
+        menubar.setNativeMenuBar(False)
+        fileMenu = menubar.addMenu("&File")
+        fileMenu.addAction(aboutAct)
+
         self.setWindowTitle(self.title)
+        layout = QVBoxLayout()
+
         #self.setGeometry(self.left, self.top, self.width, self.height)
+
         screen = self.qapp.desktop().screenGeometry()
         width, height = screen.width(), screen.height()
 
@@ -33,5 +44,5 @@ class App(QWidget):
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    ex = App(app)
+    lbm = LBmain(app)
     sys.exit(app.exec_())
