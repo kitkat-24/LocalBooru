@@ -65,9 +65,11 @@ class LBmain(QWidget):
         self.mainLayout = QVBoxLayout()
         self.mainLayout.addWidget(self.topbarFrame)
         self.mainLayout.addWidget(self.centralFrame)
+        self.mainLayout.setContentsMargins(0, 0, 0, 0)
 
         # Done
         #self.showMaximized()
+
         self.setLayout(self.mainLayout)
         self.show()
 
@@ -82,7 +84,7 @@ class LBmain(QWidget):
                 menu_icon_size.width(),
                 menu_icon_size.height(),
                 transformMode=QtCore.Qt.SmoothTransformation)
-        add_but = QExt.ImgButton(pixmap, self.topbarFrame)
+        add_but = QExt.ImgButton(pixmap, parent=self.topbarFrame)
         add_but.clicked.connect(self.add_dialogue)
 
         pixmap = QPixmap(icon_path + 'Share.svg')
@@ -90,7 +92,7 @@ class LBmain(QWidget):
                 menu_icon_size.width(),
                 menu_icon_size.height(),
                 transformMode=QtCore.Qt.SmoothTransformation)
-        share_but = QExt.ImgButton(pixmap, self.topbarFrame)
+        share_but = QExt.ImgButton(pixmap, parent=self.topbarFrame)
         share_but.clicked.connect(self.share_dialogue)
 
         pixmap = QPixmap(icon_path + 'Trash.svg')
@@ -98,7 +100,7 @@ class LBmain(QWidget):
                 menu_icon_size.width(),
                 menu_icon_size.height(),
                 transformMode=QtCore.Qt.SmoothTransformation)
-        delete_but = QExt.ImgButton(pixmap, self.topbarFrame)
+        delete_but = QExt.ImgButton(pixmap, parent=self.topbarFrame)
         delete_but.clicked.connect(self.delete_dialogue)
 
         self.search_query = QLineEdit()
@@ -142,10 +144,16 @@ class LBmain(QWidget):
         cols = int((self.width - 150) / (1.25 * thumbnail_size.width()))
         rows = int((self.height - 150) / (1.25 * thumbnail_size.height()))
 
+        # Dummy image
+        pixmap = self.scaleImg(QPixmap('image.png'), thumbnail_size)
+
         for i in range(rows):
+            # Setting min size will make empty rows display
+            layout.setColumnMinimumWidth(i, thumbnail_size.width())
+            layout.setRowMinimumHeight(i, thumbnail_size.height())
             for j in range(cols):
                 label = QLabel()
-                label.setPixmap(self.scaleImg(QPixmap('image.png'), thumbnail_size))
+                label.setPixmap(pixmap)
                 layout.addWidget(label, i, j)
 
 
