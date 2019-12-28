@@ -1,5 +1,6 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import QPainter
+from PyQt5 import QtCore
 
 class ImgButton(QAbstractButton):
     def __init__(self, pixmap, parent=None):
@@ -21,9 +22,5 @@ class ImgButton(QAbstractButton):
 
 
 class TagList(QListWidget):
-    def Clicked(self,item):
-        """Action when an item in the list is clicked.
-
-        Usage: listWidget.itemClicked.connect(listWidget.Clicked)
-        """
-        QMessageBox.information(self, "ListWidget", "You clicked: "+item.text())
+    def __init__(self, parent=None):
+        super(QListWidget, self).__init__(parent)

@@ -5,8 +5,8 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import QIcon, QPixmap
 from PyQt5 import QtCore
 
-import ImgButton as ib
 import LocalBooru as lb
+import QtExtensions as QExt
 
 thumbnail_size = QtCore.QSize(100, 100)
 icon_path = './basic-ui-icons/SVGs/'
@@ -27,42 +27,46 @@ class LBmain(QWidget):
         width, height = screen.width(), screen.height()
         self.resize(width, height)
 
-        # Create master widget + layout:
-        # Core widget owns core layout, which owns sublayouts
-        self.mainFrame = QFrame(self)
-        self.mainLayout = QVBoxLayout(self.mainFrame)
 
         # Create menu widget + layout:
         # Widgets are owned by mainFrame, added to mainLayout
-        self.topbarFrame = QFrame(self.mainFrame)
-        self.mainLayout.addWidget(self.topbarFrame)
+        self.topbarFrame = QFrame(self)
         self.topbarLayout = QHBoxLayout(self.topbarFrame)
         self.addTopbarButtons()
-        #self.topbarFrame.show()
 
         # Create layout to hold main screen elements: lefthand tag column and
         # central image gallery/close-up view.
-        self.centralFrame = QFrame(self.mainFrame)
+        self.centralFrame = QFrame(self)
         self.centralLayout = QHBoxLayout(self.centralFrame)
 
         # Create left column widget + layout:
-        self.leftFrame = QFrame(self.centralFrame)
-        self.centralLayout.addWidget(self.leftFrame)
-        self.leftLayout = QVBoxLayout(self.leftFrame)
+        self.tagBox = QGroupBox('Tags')
+        layout = QVBoxLayout()
+        self.tagList = QExt.TagList()
+        self.centralLayout.addWidget(self.tagBox)
         # Populate column
         self.addLeftCol()
-        #self.leftFrame.show()
+        self.tagList.itemClicked.connect(self.tagClicked)
+        self.tagList.show()
+        layout.addWidget(self.tagList)
+        self.tagBox.setLayout(layout)
 
         # Create image display grid widget + layout:
         self.imFrame = QFrame(self.centralFrame)
         self.centralLayout.addWidget(self.imFrame)
         self.imLayout = QGridLayout(self.imFrame)
-        #self.imFrame.show()
+
+
+
+        # Create master layout
+        self.mainLayout = QVBoxLayout()
+        self.mainLayout.addWidget(self.topbarFrame)
+        self.mainLayout.addWidget(self.centralFrame)
 
         # Done
         #self.showMaximized()
-        self.centralFrame.show()
-        #self.show()
+        self.setLayout(self.mainLayout)
+        self.show()
 
     def addTopbarButtons(self):
         """Populate the buttons in the topbar."""
@@ -71,50 +75,54 @@ class LBmain(QWidget):
                 menu_icon_size.width(),
                 menu_icon_size.height(),
                 transformMode=QtCore.Qt.SmoothTransformation)
-        add_but = ib.ImgButton(pixmap, self.topbarFrame)
+        add_but = QExt.ImgButton(pixmap, self.topbarFrame)
         add_but.clicked.connect(self.add_dialogue)
-        #add_but.setSize(menu_icon_size)
 
         pixmap = QPixmap(icon_path + 'Share.svg')
         pixmap = pixmap.scaled(
                 menu_icon_size.width(),
                 menu_icon_size.height(),
                 transformMode=QtCore.Qt.SmoothTransformation)
-        share_but = ib.ImgButton(pixmap, self.topbarFrame)
+        share_but = QExt.ImgButton(pixmap, self.topbarFrame)
         share_but.clicked.connect(self.share_dialogue)
-        #share_but.setSize(menu_icon_size)
 
         pixmap = QPixmap(icon_path + 'Trash.svg')
         pixmap = pixmap.scaled(
                 menu_icon_size.width(),
                 menu_icon_size.height(),
                 transformMode=QtCore.Qt.SmoothTransformation)
-        delete_but = ib.ImgButton(pixmap, self.topbarFrame)
+        delete_but = QExt.ImgButton(pixmap, self.topbarFrame)
         delete_but.clicked.connect(self.delete_dialogue)
-        #delete_but.setSize(menu_icon_size)
 
         self.search_query = QLineEdit()
         search_but = QPushButton('Search', self.topbarFrame)
         search_but.clicked.connect(self.search)
 
         # Add to topbar
-        self.topbarLayout.addWidget(add_but, QLayout.SetMinimumSize)
-        self.topbarLayout.addWidget(share_but, QLayout.SetMinimumSize)
-        self.topbarLayout.addWidget(delete_but, QLayout.SetMinimumSize)
-        self.topbarLayout.addWidget(self.search_query, QGridLayout.SetMaximumSize)
-        self.topbarLayout.addWidget(search_but, QLayout.SetMinimumSize)
+        self.topbarLayout.addWidget(add_but)
+        self.topbarLayout.addWidget(share_but)
+        self.topbarLayout.addWidget(delete_but)
+        self.topbarLayout.addWidget(self.search_query)
+        self.topbarLayout.addWidget(search_but)
+
+        self.topbarLayout.setAlignment(QtCore.Qt.AlignVCenter)
 
         # Stretch to fit
-        self.topbarLayout.addStretch()
+        #self.topbarLayout.addStretch()
 
     def addLeftCol(self):
         """Populate the left column with tags."""
         for i in range(7):
-            widget = QWidget(self.leftFrame)
-            label = QLabel(widget)
-            label.setText(f'bs tag {i}')
-            widget.show()
-            self.leftLayout.addWidget(widget, QLayout.SetMinimumSize)
+            self.tagList.addItem(f'bs tag {i}')
+
+    @QtCore.pyqtSlot(QListWidgetItem)
+    def tagClicked(self, item):
+        """Action when an item in the list is clicked.
+
+        Usage: listWidget.itemClicked.connect(TagList.Clicked)
+        """
+        QMessageBox.information(self, "ListWidget", "You clicked: " + item.text())
+
 
 
     #---------------------------------------------------------------------------
