@@ -3,13 +3,27 @@ from PyQt5.QtGui import QPainter
 from PyQt5 import QtCore
 
 class ImgButton(QAbstractButton):
-    def __init__(self, pixmap, parent=None):
+    def __init__(self, pixmap, pixmap_hover=None, pixmap_pressed=None, parent=None):
         super(ImgButton, self).__init__(parent)
         self.pixmap = pixmap
+        self.pixmap_hover = pixmap_hover if pixmap_hover else pixmap
+        self.pixmap_pressed = pixmap_pressed if pixmap_pressed else pixmap
+
+        self.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
 
     def paintEvent(self, event):
+        pix = self.pixmap_hover if self.underMouse() else self.pixmap
+        if self.isDown():
+            pix = self.pixmap_pressed
+
         painter = QPainter(self)
-        painter.drawPixmap(event.rect(), self.pixmap)
+        painter.drawPixmap(event.rect(), pix)
+
+    def enterEvent(self, event):
+        self.update()
+
+    def leaveEvent(self, event):
+        self.update()
 
     def sizeHint(self):
         if hasattr(self, 'prefImSize'):
