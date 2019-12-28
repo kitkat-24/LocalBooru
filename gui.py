@@ -8,7 +8,8 @@ from PyQt5 import QtCore
 import LocalBooru as lb
 import QtExtensions as QExt
 
-thumbnail_size = QtCore.QSize(100, 100)
+thumbnail_size = QtCore.QSize(150, 150)
+tag_width = 150
 icon_path = './basic-ui-icons/SVGs/'
 menu_icon_size = QtCore.QSize(64, 64)
 
@@ -24,8 +25,8 @@ class LBmain(QWidget):
         self.setWindowTitle(self.title)
 
         screen = self.qapp.desktop().screenGeometry()
-        width, height = screen.width(), screen.height()
-        self.resize(width, height)
+        self.width, self.height = screen.width(), screen.height()
+        self.resize(self.width, self.height)
 
 
         # Create menu widget + layout:
@@ -34,28 +35,30 @@ class LBmain(QWidget):
         self.topbarLayout = QHBoxLayout(self.topbarFrame)
         self.addTopbarButtons()
 
+        # Create left column widget + layout:
+        self.tagBox = QGroupBox('Tags')
+        self.tagBox.setFixedWidth(tag_width)
+        self.tagList = QExt.TagList()
+        self.addLeftCol()
+        self.tagList.itemClicked.connect(self.tagClicked)
+
+        tagLayout = QVBoxLayout()
+        tagLayout.addWidget(self.tagList, QtCore.Qt.MinimumSize)
+        self.tagBox.setLayout(tagLayout)
+
+        # Create image display grid widget + layout:
+        self.imBox = QGroupBox('Images')
+        imLayout = QGridLayout()
+        self.displayThumbnails(imLayout)
+        self.imBox.setLayout(imLayout)
+
+
         # Create layout to hold main screen elements: lefthand tag column and
         # central image gallery/close-up view.
         self.centralFrame = QFrame(self)
         self.centralLayout = QHBoxLayout(self.centralFrame)
-
-        # Create left column widget + layout:
-        self.tagBox = QGroupBox('Tags')
-        layout = QVBoxLayout()
-        self.tagList = QExt.TagList()
         self.centralLayout.addWidget(self.tagBox)
-        # Populate column
-        self.addLeftCol()
-        self.tagList.itemClicked.connect(self.tagClicked)
-        self.tagList.show()
-        layout.addWidget(self.tagList)
-        self.tagBox.setLayout(layout)
-
-        # Create image display grid widget + layout:
-        self.imFrame = QFrame(self.centralFrame)
-        self.centralLayout.addWidget(self.imFrame)
-        self.imLayout = QGridLayout(self.imFrame)
-
+        self.centralLayout.addWidget(self.imBox)
 
 
         # Create master layout
@@ -67,6 +70,10 @@ class LBmain(QWidget):
         #self.showMaximized()
         self.setLayout(self.mainLayout)
         self.show()
+
+    #---------------------------------------------------------------------------
+    # Section creation functions
+    #---------------------------------------------------------------------------
 
     def addTopbarButtons(self):
         """Populate the buttons in the topbar."""
@@ -122,6 +129,25 @@ class LBmain(QWidget):
         Usage: listWidget.itemClicked.connect(TagList.Clicked)
         """
         QMessageBox.information(self, "ListWidget", "You clicked: " + item.text())
+
+    def scaleImg(self, pix: QPixmap, size: QtCore.QSize):
+        """Scale an a QPixmap and maintain aspect ratio."""
+        return pix.scaled(size.width(), size.height(),
+                QtCore.Qt.KeepAspectRatio,
+                transformMode=QtCore.Qt.SmoothTransformation)
+
+
+    def displayThumbnails(self, layout):
+        """Display grid of thumbnails."""
+        cols = int((self.width - 150) / (1.25 * thumbnail_size.width()))
+        rows = int((self.height - 150) / (1.25 * thumbnail_size.height()))
+
+        for i in range(rows):
+            for j in range(cols):
+                label = QLabel()
+                label.setPixmap(self.scaleImg(QPixmap('image.png'), thumbnail_size))
+                layout.addWidget(label, i, j)
+
 
 
 
