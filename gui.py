@@ -1,6 +1,7 @@
 import sys
 from collections import namedtuple
-from PyQt5.QtWidgets import QApplication, QMainWindow, QAction, QWidget, QFrame, QLabel, QVBoxLayout, QHBoxLayout, QGridLayout, QPushButton, QMessageBox
+from PyQt5 import QtWidgets
+from PyQt5.QtWidgets import QApplication, QMainWindow, QAction, QWidget, QFrame, QLabel, QVBoxLayout, QHBoxLayout, QGridLayout, QPushButton, QMessageBox, QLineEdit
 from PyQt5.QtGui import QIcon, QPixmap
 from PyQt5 import QtCore
 
@@ -9,10 +10,12 @@ import LocalBooru as lb
 Dimension = namedtuple('Dimension', 'w h')
 thumbnail = Dimension(100, 100)
 icon_path = './basic-ui-icons/SVGs/'
-menu_icon_size = QtCore.QSize(24,24)
+menu_icon_size = QtCore.QSize(48, 48)
+menu_button_size = QtCore.QSize(menu_icon_size.width() + 8, menu_icon_size.height() + 8)
+print(menu_button_size)
 
 
-class LBmain(QMainWindow):
+class LBmain(QWidget):
     def __init__(self, qapp):
         super().__init__()
         self.title = 'LocalBooru'
@@ -20,21 +23,16 @@ class LBmain(QMainWindow):
         self.initUI()
 
     def initUI(self):
-        ## Create menubar
-        #aboutAct = QAction(QIcon('exit.png'), 'About',self)
-        #aboutAct.setStatusTip("About the app")
-        #menubar = self.menuBar()
-        #menubar.setNativeMenuBar(False)
-        #fileMenu = menubar.addMenu("&File")
-        #fileMenu.addAction(aboutAct)
-
         self.setWindowTitle(self.title)
+
+        screen = self.qapp.desktop().screenGeometry()
+        width, height = screen.width(), screen.height()
+        self.resize(width, height)
 
         # Create master widget + layout:
         # Core widget owns core layout, which owns sublayouts
         self.mainFrame = QFrame(self)
         self.mainLayout = QVBoxLayout(self.mainFrame)
-        self.setCentralWidget(self.mainFrame)
 
         # Create menu widget + layout:
         # Widgets are owned by mainFrame, added to mainLayout
@@ -51,42 +49,40 @@ class LBmain(QMainWindow):
         #leftcol = QVBoxLayout()
         #browser = QGridLayout(self)
 
-
-
-
-        #self.setGeometry(self.left, self.top, self.width, self.height)
-
-        screen = self.qapp.desktop().screenGeometry()
-        width, height = screen.width(), screen.height()
-
-        # Create widget
-        #label = QLabel(self)
-        #pixmap = QPixmap('image.png')
-        #pixmap = pixmap.scaled(width, height, QtCore.Qt.KeepAspectRatio)
-        #label.setPixmap(pixmap)
-        self.showMaximized()
+        # Done
+        #self.showMaximized()
+        self.show()
 
     def addTopbarButtons(self):
         """Populate the buttons in the topbar."""
-        add_but = QPushButton('', self)
+        add_but = QPushButton('', self.topbarFrame)
         add_but.clicked.connect(self.add_dialogue)
         add_but.setIcon(QIcon(icon_path + 'Plus.svg'))
         add_but.setIconSize(menu_icon_size)
 
-        share_but = QPushButton('', self)
+        share_but = QPushButton('', self.topbarFrame)
         share_but.clicked.connect(self.share_dialogue)
         share_but.setIcon(QIcon(icon_path + 'Share.svg'))
         share_but.setIconSize(menu_icon_size)
 
-        delete_but = QPushButton('', self)
+        delete_but = QPushButton('', self.topbarFrame)
         delete_but.clicked.connect(self.delete_dialogue)
         delete_but.setIcon(QIcon(icon_path + 'Trash.svg'))
         delete_but.setIconSize(menu_icon_size)
 
+        self.search_query = QLineEdit()
+        search_but = QPushButton('Search', self.topbarFrame)
+        search_but.clicked.connect(self.search)
+
         # Add to topbar
-        self.topbarLayout.addWidget(add_but)
-        self.topbarLayout.addWidget(share_but)
-        self.topbarLayout.addWidget(delete_but)
+        self.topbarLayout.addWidget(add_but, QtWidgets.QLayout.SetMinimumSize)
+        self.topbarLayout.addWidget(share_but, QtWidgets.QLayout.SetMinimumSize)
+        self.topbarLayout.addWidget(delete_but, QtWidgets.QLayout.SetMinimumSize)
+        self.topbarLayout.addWidget(self.search_query, QtWidgets.QGridLayout.SetMaximumSize)
+        self.topbarLayout.addWidget(search_but, QtWidgets.QLayout.SetMinimumSize)
+
+        # Stretch to fit
+        self.topbarLayout.addStretch()
 
 
     #---------------------------------------------------------------------------
@@ -108,6 +104,12 @@ class LBmain(QMainWindow):
         """Begin dialogue to remove an image from the database."""
         alert = QMessageBox()
         alert.setText('You clicked the delete button!')
+        alert.exec_()
+
+    def search(self):
+        """Perform a database search."""
+        alert = QMessageBox()
+        alert.setText('You searched for: {}!'.format(self.search_query.text()))
         alert.exec_()
 
 
