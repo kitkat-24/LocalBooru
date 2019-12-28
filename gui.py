@@ -1,6 +1,6 @@
 import sys
 from collections import namedtuple
-from PyQt5.QtWidgets import QApplication, QMainWindow, QAction, QWidget, QtFrame, QLabel, QVBoxLayout, QHBoxLayout, QGridLayout, QPushButton
+from PyQt5.QtWidgets import QApplication, QMainWindow, QAction, QWidget, QFrame, QLabel, QVBoxLayout, QHBoxLayout, QGridLayout, QPushButton, QMessageBox
 from PyQt5.QtGui import QIcon, QPixmap
 from PyQt5 import QtCore
 
@@ -39,18 +39,17 @@ class LBmain(QMainWindow):
         # Create menu widget + layout:
         # Widgets are owned by mainFrame, added to mainLayout
         self.topbarFrame = QFrame(self.mainFrame)
-        self.mainLayout.addWidget(self.topBarFrame)
+        self.mainLayout.addWidget(self.topbarFrame)
         self.topbarLayout = QHBoxLayout(self.topbarFrame)
-        # Segment code
         self.addTopbarButtons()
         self.topbarFrame.show()
 
 
 
 
-        mainseg = QHBoxLayout()
-        leftcol = QVBoxLayout()
-        browser = QGridLayout(self)
+        #mainseg = QHBoxLayout()
+        #leftcol = QVBoxLayout()
+        #browser = QGridLayout(self)
 
 
 
@@ -61,27 +60,27 @@ class LBmain(QMainWindow):
         width, height = screen.width(), screen.height()
 
         # Create widget
-        label = QLabel(self)
-        pixmap = QPixmap('image.png')
-        pixmap = pixmap.scaled(width, height, QtCore.Qt.KeepAspectRatio)
-        label.setPixmap(pixmap)
+        #label = QLabel(self)
+        #pixmap = QPixmap('image.png')
+        #pixmap = pixmap.scaled(width, height, QtCore.Qt.KeepAspectRatio)
+        #label.setPixmap(pixmap)
         self.showMaximized()
 
     def addTopbarButtons(self):
         """Populate the buttons in the topbar."""
         add_but = QPushButton('', self)
         add_but.clicked.connect(self.add_dialogue)
-        add_but.setIcon(QtGui.QIcon(icon_path + 'Plus.svg'))
+        add_but.setIcon(QIcon(icon_path + 'Plus.svg'))
         add_but.setIconSize(menu_icon_size)
 
         share_but = QPushButton('', self)
         share_but.clicked.connect(self.share_dialogue)
-        share_but.setIcon(QtGui.QIcon(icon_path + 'Share.svg'))
+        share_but.setIcon(QIcon(icon_path + 'Share.svg'))
         share_but.setIconSize(menu_icon_size)
 
         delete_but = QPushButton('', self)
         delete_but.clicked.connect(self.delete_dialogue)
-        delete_but.setIcon(QtGui.QIcon(icon_path + 'Trash.svg'))
+        delete_but.setIcon(QIcon(icon_path + 'Trash.svg'))
         delete_but.setIconSize(menu_icon_size)
 
         # Add to topbar
