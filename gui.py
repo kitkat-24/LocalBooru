@@ -1,6 +1,6 @@
 import sys
 from collections import namedtuple
-from PyQt5.QtWidgets import QApplication, QMainWindow, QAction, QWidget, QLabel, QVBoxLayout, QHBoxLayout, QGridLayout, QPushButton
+from PyQt5.QtWidgets import QApplication, QMainWindow, QAction, QWidget, QtFrame, QLabel, QVBoxLayout, QHBoxLayout, QGridLayout, QPushButton
 from PyQt5.QtGui import QIcon, QPixmap
 from PyQt5 import QtCore
 
@@ -32,13 +32,13 @@ class LBmain(QMainWindow):
 
         # Create master widget + layout:
         # Core widget owns core layout, which owns sublayouts
-        self.mainFrame = QtWidgets.QFrame(self)
+        self.mainFrame = QFrame(self)
         self.mainLayout = QVBoxLayout(self.mainFrame)
         self.setCentralWidget(self.mainFrame)
 
         # Create menu widget + layout:
         # Widgets are owned by mainFrame, added to mainLayout
-        self.topbarFrame = QtWidgets.QFrame(self.mainFrame)
+        self.topbarFrame = QFrame(self.mainFrame)
         self.mainLayout.addWidget(self.topBarFrame)
         self.topbarLayout = QHBoxLayout(self.topbarFrame)
         # Segment code
