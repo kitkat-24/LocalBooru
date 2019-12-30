@@ -4,6 +4,7 @@ from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import QIcon, QPixmap
 from PyQt5 import QtCore
+import random
 
 import LocalBooru as lb
 import QtExtensions as QExt
@@ -144,17 +145,30 @@ class LBmain(QWidget):
         cols = int((self.width - 150) / (1.25 * thumbnail_size.width()))
         rows = int((self.height - 150) / (1.25 * thumbnail_size.height()))
 
-        # Dummy image
-        pixmap = self.scaleImg(QPixmap('image.png'), thumbnail_size)
+        fids = list(lb.search(None)) # Empty search = return all tags
+        if len(fids) > 16:
+            fids = random.sample(fids, 16)
 
+        pixmaps = [QPixmap('data/' + f) for f in fids]
+        thumbs = [self.scaleImg(p, thumbnail_size) for p in pixmaps]
+
+        # Dummy image
+        #pixmap = self.scaleImg(QPixmap('image.png'), thumbnail_size)
+
+        count = 0
         for i in range(rows):
             # Setting min size will make empty rows display
             layout.setColumnMinimumWidth(i, thumbnail_size.width())
             layout.setRowMinimumHeight(i, thumbnail_size.height())
             for j in range(cols):
                 label = QLabel()
-                label.setPixmap(pixmap)
+                if (count < len(pixmaps)):
+                    label.setPixmap(thumbs[count])
+                    label.show()
+#                else:
+#                    label.hide()
                 layout.addWidget(label, i, j)
+                count += 1
 
 
 

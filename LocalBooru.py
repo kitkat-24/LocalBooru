@@ -114,8 +114,10 @@ def search(tags):
     :returns: Set of file_ids for files that have all listed tags.
     """
     results = set()
+    # If given no tags, just return all files
     if not tags:
         results = set(file_index.keys())
+    # Otherwise, perform search
     else:
         for tag in tags:
             if tag in tag_list:
@@ -128,7 +130,7 @@ def search(tags):
         pp.pprint(results)
         return results
     else:
-        print('No files tagged with "{}" found.'.format(" ".join(sorted(tags))))
+        logging.info('No files tagged with "{}" found.'.format(" ".join(sorted(tags))))
         return None
 
 ################################################################################
