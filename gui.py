@@ -15,11 +15,12 @@ icon_path = './basic-ui-icons/SVGs/'
 menu_icon_size = QtCore.QSize(64, 64)
 
 
-class LBmain(QWidget):
+class LBmain(QMainWindow):
     def __init__(self, qapp):
         super().__init__()
         self.title = 'LocalBooru'
         self.qapp = qapp
+        self.scaleFactor = 0.0
         self.initUI()
 
     def initUI(self):
@@ -49,9 +50,21 @@ class LBmain(QWidget):
 
         # Create image display grid widget + layout:
         self.imBox = QGroupBox('Images')
-        imLayout = QGridLayout()
-        self.displayThumbnails(imLayout)
-        self.imBox.setLayout(imLayout)
+        self.imLayout = QGridLayout()
+        self.displayThumbnails(self.imLayout)
+        self.imBox.setLayout(self.imLayout)
+
+        # Create image zoom display
+        self.imZoomBox = QGroupBox('Image')
+        self.imZoomLayout = QBoxLayout()
+
+        self.imageLabel = QExt.ImgButton()
+        self.imageLabel.clicked.connect(self.unenlarge)
+        self.scrollArea = QScrollArea()
+        self.scrollArea.setWidget(self.imageLabel)
+        self.imZoomLayout.addWidget(self.scrollArea)
+        self.imZoomBox.setLayout(self.imZoomLayout)
+        self.imZoomBox.hide()
 
 
         # Create layout to hold main screen elements: lefthand tag column and
@@ -60,6 +73,7 @@ class LBmain(QWidget):
         self.centralLayout = QHBoxLayout(self.centralFrame)
         self.centralLayout.addWidget(self.tagBox)
         self.centralLayout.addWidget(self.imBox)
+        self.centralLayout.addWidget(self.imZoomBox)
 
 
         # Create master layout
@@ -68,10 +82,16 @@ class LBmain(QWidget):
         self.mainLayout.addWidget(self.centralFrame)
         self.mainLayout.setContentsMargins(0, 0, 0, 0)
 
-        # Done
-        #self.showMaximized()
+        self.mainWidget = QWidget()
+        self.mainWidget.setLayout(self.mainLayout)
+        self.setCentralWidget(self.mainWidget)
 
-        self.setLayout(self.mainLayout)
+
+        # Final setup
+        self.createActions()
+        self.createMenus()
+
+        # Done
         self.show()
 
     #---------------------------------------------------------------------------
@@ -145,12 +165,12 @@ class LBmain(QWidget):
         cols = int((self.width - 150) / (1.25 * thumbnail_size.width()))
         rows = int((self.height - 150) / (1.25 * thumbnail_size.height()))
 
-        fids = list(lb.search(None)) # Empty search = return all tags
-        if len(fids) > 16:
-            fids = random.sample(fids, 16)
+        self.search_fids = list(lb.search(None)) # Empty search = return all images
+        if len(self.search_fids) > 16:
+            self.search_fids = random.sample(self.search_fids, 16)
 
-        pixmaps = [QPixmap('data/' + f) for f in fids]
-        thumbs = [self.scaleImg(p, thumbnail_size) for p in pixmaps]
+        self.search_results = [QPixmap('data/' + f) for f in self.search_fids]
+        self.search_thumbs = [self.scaleImg(p, thumbnail_size) for p in self.search_results]
 
         # Dummy image
         #pixmap = self.scaleImg(QPixmap('image.png'), thumbnail_size)
@@ -161,16 +181,15 @@ class LBmain(QWidget):
             layout.setColumnMinimumWidth(i, thumbnail_size.width())
             layout.setRowMinimumHeight(i, thumbnail_size.height())
             for j in range(cols):
-                label = QLabel()
-                if (count < len(pixmaps)):
-                    label.setPixmap(thumbs[count])
-                    label.show()
-#                else:
-#                    label.hide()
-                layout.addWidget(label, i, j)
+                if (count < len(self.search_results)):
+                    thumb = QExt.ImgButton(pixmap=self.search_thumbs[count], parent=layout)
+                    thumb.clicked.connect(lambda: self.enlarge(count))
+                else:
+                    thumb = QLabel()
+                    thumb.hide()
+
+                layout.addWidget(thumb, i, j)
                 count += 1
-
-
 
 
     #---------------------------------------------------------------------------
@@ -199,6 +218,110 @@ class LBmain(QWidget):
         alert = QMessageBox()
         alert.setText('You searched for: {}!'.format(self.search_query.text()))
         alert.exec_()
+
+    def enlarge(self, index: int):
+        """Enlarge the search result thumbnail image."""
+        self.imBox.hide()
+
+        self.imageLabel.pixmap = self.search_results[index]
+        self.scaleFactor = 1.0
+        self.fitToWindowAct.setEnabled(True)
+        self.imZoomBox.show()
+
+    def unenlarge(self):
+        """Shrink the focused image and return to search results."""
+        self.imZoomBox.hide()
+        self.fitToWindowAct.setEnabled(False)
+        self.imBox.show()
+
+
+
+    #---------------------------------------------------------------------------
+    # Image stuff
+    #---------------------------------------------------------------------------
+    def createActions(self):
+#        self.openAct = QAction("&Open...", self, shortcut="Ctrl+O", triggered=self.open)
+#        self.printAct = QAction("&Print...", self, shortcut="Ctrl+P", enabled=False, triggered=self.print_)
+#        self.exitAct = QAction("E&xit", self, shortcut="Ctrl+Q", triggered=self.close)
+        self.zoomInAct = QAction("Zoom &In (25%)", self, shortcut="Ctrl++", enabled=False, triggered=self.zoomIn)
+        self.zoomOutAct = QAction("Zoom &Out (25%)", self, shortcut="Ctrl+-", enabled=False, triggered=self.zoomOut)
+        self.normalSizeAct = QAction("&Normal Size", self, shortcut="Ctrl+S", enabled=False, triggered=self.normalSize)
+        self.fitToWindowAct = QAction("&Fit to Window", self, enabled=False, checkable=True, shortcut="Ctrl+F",
+                                      triggered=self.fitToWindow)
+#        self.aboutAct = QAction("&About", self, triggered=self.about)
+#        self.aboutQtAct = QAction("About &Qt", self, triggered=qApp.aboutQt)
+
+    def createMenus(self):
+#        self.fileMenu = QMenu("&File", self)
+#        self.fileMenu.addAction(self.openAct)
+#        self.fileMenu.addAction(self.printAct)
+#        self.fileMenu.addSeparator()
+#        self.fileMenu.addAction(self.exitAct)
+
+        self.viewMenu = QMenu("&View", self)
+        self.viewMenu.addAction(self.zoomInAct)
+        self.viewMenu.addAction(self.zoomOutAct)
+        self.viewMenu.addAction(self.normalSizeAct)
+        self.viewMenu.addSeparator()
+        self.viewMenu.addAction(self.fitToWindowAct)
+
+#        self.helpMenu = QMenu("&Help", self)
+#        self.helpMenu.addAction(self.aboutAct)
+#        self.helpMenu.addAction(self.aboutQtAct)
+
+#        self.menuBar().addMenu(self.fileMenu)
+        self.menuBar().addMenu(self.viewMenu)
+#        self.menuBar().addMenu(self.helpMenu)
+
+    def updateActions(self):
+        self.zoomInAct.setEnabled(not self.fitToWindowAct.isChecked())
+        self.zoomOutAct.setEnabled(not self.fitToWindowAct.isChecked())
+        self.normalSizeAct.setEnabled(not self.fitToWindowAct.isChecked())
+
+    def zoomIn(self):
+        self.scaleImage(1.25)
+
+    def zoomOut(self):
+        self.scaleImage(0.8)
+
+    def normalSize(self):
+        self.imageLabel.adjustSize()
+        self.scaleFactor = 1.0
+
+    def fitToWindow(self):
+        """Resize image to fit in the display area while maintaining the
+        aspect ratio.
+        """
+        fitToWindow = self.fitToWindowAct.isChecked()
+        if fitToWindow:
+            size = self.imZoomBox.size()
+            bh, bw = size.height(), size.width()
+            ih, iw = self.imageLabel.size().height(), self.imageLabel.size().width()
+            hscale = bh / ih
+            wscale = bw / iw
+            if hscale < wscale:
+                self.scaleImage(hscale)
+            else:
+                self.scaleImage(wscale)
+        else:
+            self.normalSize()
+
+        self.updateActions()
+
+    def scaleImage(self, factor):
+        self.scaleFactor *= factor
+        self.imageLabel.resize(self.scaleFactor * self.imageLabel.pixmap().size())
+
+        self.adjustScrollBar(self.scrollArea.horizontalScrollBar(), factor)
+        self.adjustScrollBar(self.scrollArea.verticalScrollBar(), factor)
+
+        self.zoomInAct.setEnabled(self.scaleFactor < 3.0)
+        self.zoomOutAct.setEnabled(self.scaleFactor > 0.333)
+
+    def adjustScrollBar(self, scrollBar, factor):
+        scrollBar.setValue(int(factor * scrollBar.value()
+                               + ((factor - 1) * scrollBar.pageStep() / 2)))
+
 
 
 if __name__ == '__main__':

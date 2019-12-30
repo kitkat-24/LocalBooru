@@ -77,9 +77,24 @@ class QImageViewer(QMainWindow):
         self.scaleFactor = 1.0
 
     def fitToWindow(self):
+        #fitToWindow = self.fitToWindowAct.isChecked()
+        #self.scrollArea.setWidgetResizable(fitToWindow)
+        #if not fitToWindow:
+        #    self.normalSize()
+
+        #self.updateActions()
         fitToWindow = self.fitToWindowAct.isChecked()
-        self.scrollArea.setWidgetResizable(fitToWindow)
-        if not fitToWindow:
+        if fitToWindow:
+            size = self.scrollArea.size()
+            bh, bw = size.height(), size.width()
+            ih, iw = self.imageLabel.size().height(), self.imageLabel.size().width()
+            hscale = bh / ih
+            wscale = bw / iw
+            if hscale < wscale:
+                self.scaleImage(hscale)
+            else:
+                self.scaleImage(wscale)
+        else:
             self.normalSize()
 
         self.updateActions()
