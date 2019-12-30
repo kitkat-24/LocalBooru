@@ -305,9 +305,9 @@ class LBmain(QMainWindow):
             hscale = bh / ih
             wscale = bw / iw
             if hscale < wscale:
-                self.scaleImage(wscale)
-            else:
                 self.scaleImage(hscale)
+            else:
+                self.scaleImage(wscale)
         else:
             self.normalSize()
 
