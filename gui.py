@@ -56,9 +56,10 @@ class LBmain(QMainWindow):
 
         # Create image zoom display
         self.imZoomBox = QGroupBox('Image')
-        self.imZoomLayout = QBoxLayout()
+        self.imZoomLayout = QVBoxLayout()
 
-        self.imageLabel = QExt.ImgButton()
+        dummypix = QPixmap('image.png')
+        self.imageLabel = QExt.ImgButton(pixmap=dummypix)
         self.imageLabel.clicked.connect(self.unenlarge)
         self.scrollArea = QScrollArea()
         self.scrollArea.setWidget(self.imageLabel)
@@ -159,6 +160,8 @@ class LBmain(QMainWindow):
                 QtCore.Qt.KeepAspectRatio,
                 transformMode=QtCore.Qt.SmoothTransformation)
 
+    def createCallback(self, index: int):
+        return lambda: self.enlarge(index)
 
     def displayThumbnails(self, layout):
         """Display grid of thumbnails."""
@@ -182,8 +185,8 @@ class LBmain(QMainWindow):
             layout.setRowMinimumHeight(i, thumbnail_size.height())
             for j in range(cols):
                 if (count < len(self.search_results)):
-                    thumb = QExt.ImgButton(pixmap=self.search_thumbs[count], parent=layout)
-                    thumb.clicked.connect(lambda: self.enlarge(count))
+                    thumb = QExt.ImgButton(pixmap=self.search_thumbs[count])
+                    thumb.clicked.connect(self.createCallback(count))
                 else:
                     thumb = QLabel()
                     thumb.hide()
@@ -221,6 +224,7 @@ class LBmain(QMainWindow):
 
     def enlarge(self, index: int):
         """Enlarge the search result thumbnail image."""
+        print(index)
         self.imBox.hide()
 
         self.imageLabel.pixmap = self.search_results[index]
