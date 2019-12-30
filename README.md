@@ -16,6 +16,11 @@ First vaguely functional build. Implemented simple homebrew database that works
 through a dictionary of the form {file\_id: [list of tags]} and a reverse
 dictionary of the form {tag: [list of file\_ids]}.
 
+Acknowledgements
+================
+Big thank you to [acbetter](https://gist.github.com/acbetter) for their
+[PyQt5 Image Viewer demo!](https://gist.github.com/acbetter/32c575803ec361c3e82064e60db4e3e0)
+
 ### Functions:
 
 - add: can add a file through the commandline with tags given
