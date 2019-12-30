@@ -186,6 +186,8 @@ class LBmain(QMainWindow):
             for j in range(cols):
                 if (count < len(self.search_results)):
                     thumb = QExt.ImgButton(pixmap=self.search_thumbs[count])
+                    # We require the createCallback() function to create a new
+                    # scope so that the associated value of count is saved.
                     thumb.clicked.connect(self.createCallback(count))
                 else:
                     thumb = QLabel()
@@ -227,7 +229,7 @@ class LBmain(QMainWindow):
         print(index)
         self.imBox.hide()
 
-        self.imageLabel.pixmap = self.search_results[index]
+        self.imageLabel.setPixmap(self.search_results[index])
         self.scaleFactor = 1.0
         self.fitToWindowAct.setEnabled(True)
         self.imZoomBox.show()
@@ -298,15 +300,14 @@ class LBmain(QMainWindow):
         """
         fitToWindow = self.fitToWindowAct.isChecked()
         if fitToWindow:
-            size = self.imZoomBox.size()
-            bh, bw = size.height(), size.width()
+            bh, bw = self.imZoomBox.size().height(), self.imZoomBox.size().width()
             ih, iw = self.imageLabel.size().height(), self.imageLabel.size().width()
             hscale = bh / ih
             wscale = bw / iw
             if hscale < wscale:
-                self.scaleImage(hscale)
-            else:
                 self.scaleImage(wscale)
+            else:
+                self.scaleImage(hscale)
         else:
             self.normalSize()
 
@@ -314,7 +315,7 @@ class LBmain(QMainWindow):
 
     def scaleImage(self, factor):
         self.scaleFactor *= factor
-        self.imageLabel.resize(self.scaleFactor * self.imageLabel.pixmap().size())
+        self.imageLabel.resize(self.scaleFactor * self.imageLabel.size())
 
         self.adjustScrollBar(self.scrollArea.horizontalScrollBar(), factor)
         self.adjustScrollBar(self.scrollArea.verticalScrollBar(), factor)

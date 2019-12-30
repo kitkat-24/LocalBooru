@@ -12,6 +12,11 @@ class ImgButton(QAbstractButton):
         self.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         self.preferredSize = None
 
+    def setPixmap(self, pixmap, pixmap_hover=None, pixmap_pressed=None):
+        self.pixmap = pixmap
+        self.pixmap_hover = pixmap_hover if pixmap_hover else pixmap
+        self.pixmap_pressed = pixmap_pressed if pixmap_pressed else pixmap
+
     def paintEvent(self, event):
         pix = self.pixmap_hover if self.underMouse() else self.pixmap
         if self.isDown():
@@ -27,6 +32,9 @@ class ImgButton(QAbstractButton):
         self.update()
 
     def sizeHint(self):
+        return self.preferredSize if self.preferredSize else self.pixmap.size()
+
+    def size(self):
         return self.preferredSize if self.preferredSize else self.pixmap.size()
 
     def setSize(self, size):
