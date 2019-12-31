@@ -20,7 +20,6 @@ class LBmain(QMainWindow):
         super().__init__()
         self.title = 'LocalBooru'
         self.qapp = qapp
-        self.scaleFactor = 0.0
         self.initUI()
 
     def initUI(self):
@@ -61,9 +60,11 @@ class LBmain(QMainWindow):
         dummypix = QPixmap('image.png')
         self.imageLabel = QExt.ImgButton(pixmap=dummypix)
         self.imageLabel.clicked.connect(self.unenlarge)
+        self.imageLabel.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
         self.scrollArea = QScrollArea()
         self.scrollArea.setWidget(self.imageLabel)
         self.imZoomLayout.addWidget(self.scrollArea)
+        self.imZoomLayout.setSizeConstraint(QLayout.SetNoConstraint)
         self.imZoomBox.setLayout(self.imZoomLayout)
         self.imZoomBox.hide()
 
@@ -138,9 +139,6 @@ class LBmain(QMainWindow):
 
         self.topbarLayout.setAlignment(QtCore.Qt.AlignVCenter)
 
-        # Stretch to fit
-        #self.topbarLayout.addStretch()
-
     def addLeftCol(self):
         """Populate the left column with tags."""
         for i in range(7):
@@ -174,9 +172,6 @@ class LBmain(QMainWindow):
 
         self.search_results = [QPixmap('data/' + f) for f in self.search_fids]
         self.search_thumbs = [self.scaleImg(p, thumbnail_size) for p in self.search_results]
-
-        # Dummy image
-        #pixmap = self.scaleImg(QPixmap('image.png'), thumbnail_size)
 
         count = 0
         for i in range(rows):
@@ -226,18 +221,15 @@ class LBmain(QMainWindow):
 
     def enlarge(self, index: int):
         """Enlarge the search result thumbnail image."""
-        print(index)
         self.imBox.hide()
-
+        self.imZoomBox.show()
         self.imageLabel.setPixmap(self.search_results[index])
         self.scaleFactor = 1.0
-        self.fitToWindowAct.setEnabled(True)
-        self.imZoomBox.show()
+        self.fitToWindow()
 
     def unenlarge(self):
         """Shrink the focused image and return to search results."""
         self.imZoomBox.hide()
-        self.fitToWindowAct.setEnabled(False)
         self.imBox.show()
 
 
@@ -252,8 +244,6 @@ class LBmain(QMainWindow):
         self.zoomInAct = QAction("Zoom &In (25%)", self, shortcut="Ctrl++", enabled=False, triggered=self.zoomIn)
         self.zoomOutAct = QAction("Zoom &Out (25%)", self, shortcut="Ctrl+-", enabled=False, triggered=self.zoomOut)
         self.normalSizeAct = QAction("&Normal Size", self, shortcut="Ctrl+S", enabled=False, triggered=self.normalSize)
-        self.fitToWindowAct = QAction("&Fit to Window", self, enabled=False, checkable=True, shortcut="Ctrl+F",
-                                      triggered=self.fitToWindow)
 #        self.aboutAct = QAction("&About", self, triggered=self.about)
 #        self.aboutQtAct = QAction("About &Qt", self, triggered=qApp.aboutQt)
 
@@ -268,8 +258,6 @@ class LBmain(QMainWindow):
         self.viewMenu.addAction(self.zoomInAct)
         self.viewMenu.addAction(self.zoomOutAct)
         self.viewMenu.addAction(self.normalSizeAct)
-        self.viewMenu.addSeparator()
-        self.viewMenu.addAction(self.fitToWindowAct)
 
 #        self.helpMenu = QMenu("&Help", self)
 #        self.helpMenu.addAction(self.aboutAct)
@@ -278,11 +266,6 @@ class LBmain(QMainWindow):
 #        self.menuBar().addMenu(self.fileMenu)
         self.menuBar().addMenu(self.viewMenu)
 #        self.menuBar().addMenu(self.helpMenu)
-
-    def updateActions(self):
-        self.zoomInAct.setEnabled(not self.fitToWindowAct.isChecked())
-        self.zoomOutAct.setEnabled(not self.fitToWindowAct.isChecked())
-        self.normalSizeAct.setEnabled(not self.fitToWindowAct.isChecked())
 
     def zoomIn(self):
         self.scaleImage(1.25)
@@ -295,33 +278,28 @@ class LBmain(QMainWindow):
         self.scaleFactor = 1.0
 
     def fitToWindow(self):
-        """Resize image to fit in the display area while maintaining the
-        aspect ratio.
+        """Resize image to fit in the display area while maintaining the aspect
+        ratio.
         """
-        fitToWindow = self.fitToWindowAct.isChecked()
-        if fitToWindow:
-            bh, bw = self.imZoomBox.size().height(), self.imZoomBox.size().width()
-            ih, iw = self.imageLabel.size().height(), self.imageLabel.size().width()
-            hscale = bh / ih
-            wscale = bw / iw
-            if hscale < wscale:
-                self.scaleImage(hscale)
-            else:
-                self.scaleImage(wscale)
+        bh, bw = self.scrollArea.size().height(), self.scrollArea.size().width()
+        ih, iw = self.imageLabel.size().height(), self.imageLabel.size().width()
+        hscale = bh / ih
+        wscale = bw / iw
+        if hscale < wscale:
+            self.scaleImage(hscale)
         else:
-            self.normalSize()
-
-        self.updateActions()
+            self.scaleImage(wscale)
 
     def scaleImage(self, factor):
         self.scaleFactor *= factor
-        self.imageLabel.resize(self.scaleFactor * self.imageLabel.size())
+        #self.imageLabel.resize(self.scaleFactor * self.imageLabel.size())
+        self.imageLabel.resize(QtCore.QSize(300, 300))
 
         self.adjustScrollBar(self.scrollArea.horizontalScrollBar(), factor)
         self.adjustScrollBar(self.scrollArea.verticalScrollBar(), factor)
 
-        self.zoomInAct.setEnabled(self.scaleFactor < 3.0)
-        self.zoomOutAct.setEnabled(self.scaleFactor > 0.333)
+        self.zoomInAct.setEnabled(self.scaleFactor < 4.0)
+        self.zoomOutAct.setEnabled(self.scaleFactor > 0.25)
 
     def adjustScrollBar(self, scrollBar, factor):
         scrollBar.setValue(int(factor * scrollBar.value()
