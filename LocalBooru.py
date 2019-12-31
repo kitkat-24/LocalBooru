@@ -156,6 +156,7 @@ def parse_args(args):
     operation = None
     tags = []
     filename = ''
+    fid = ''
     for opt, arg in opts:
         if opt == '-h':
             print(help_str)
@@ -183,9 +184,9 @@ def parse_args(args):
     # and arguments from the argument list it is passed).
     tags = set(tags + args)
 
-    return operation, tags, filename
+    return operation, tags, filename, fid
 
-def call_operation(operation, tags, filename=''):
+def call_operation(operation, tags, filename='', fid=''):
     """
     Calls the appropriate operation.
 
@@ -210,8 +211,8 @@ def call_operation(operation, tags, filename=''):
 
 
 def main(args):
-    operation, tags, filename = parse_args(args)
-    return call_operation(operation, tags, filename)
+    operation, tags, filename, fid = parse_args(args)
+    return call_operation(operation, tags, filename, fid)
 
 
 
