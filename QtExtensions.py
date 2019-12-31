@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import QPainter
 from PyQt5 import QtCore
+from PyQt5.Qt import Qt
 
 class ImgButton(QAbstractButton):
     def __init__(self, pixmap, pixmap_hover=None, pixmap_pressed=None, parent=None):
@@ -39,6 +40,20 @@ class ImgButton(QAbstractButton):
 
     def setSize(self, size):
         self.prefImSize = size
+
+
+class ImageLabel(QLabel):
+    def __init__(self, parent=None, onClick=None):
+        super(ImageLabel, self).__init__(parent)
+        self.onClick = onClick
+
+        self.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
+        self.setScaledContents(True)
+
+    def mousePressEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            if self.onClick:
+                self.onClick()
 
 
 class TagList(QListWidget):

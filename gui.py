@@ -57,12 +57,10 @@ class LBmain(QMainWindow):
         self.imZoomBox = QGroupBox('Image')
         self.imZoomLayout = QVBoxLayout()
 
-        dummypix = QPixmap('image.png')
-        self.imageLabel = QExt.ImgButton(pixmap=dummypix)
-        self.imageLabel.clicked.connect(self.unenlarge)
-        self.imageLabel.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
+        self.imageLabel = QExt.ImageLabel(onClick=self.unenlarge)
         self.scrollArea = QScrollArea()
         self.scrollArea.setWidget(self.imageLabel)
+
         self.imZoomLayout.addWidget(self.scrollArea)
         self.imZoomLayout.setSizeConstraint(QLayout.SetNoConstraint)
         self.imZoomBox.setLayout(self.imZoomLayout)
@@ -225,6 +223,9 @@ class LBmain(QMainWindow):
         self.imZoomBox.show()
         self.imageLabel.setPixmap(self.search_results[index])
         self.scaleFactor = 1.0
+
+        # Hack to make starting fitted to window work
+        self.normalSize()
         self.fitToWindow()
 
     def unenlarge(self):
@@ -241,9 +242,11 @@ class LBmain(QMainWindow):
 #        self.openAct = QAction("&Open...", self, shortcut="Ctrl+O", triggered=self.open)
 #        self.printAct = QAction("&Print...", self, shortcut="Ctrl+P", enabled=False, triggered=self.print_)
 #        self.exitAct = QAction("E&xit", self, shortcut="Ctrl+Q", triggered=self.close)
-        self.zoomInAct = QAction("Zoom &In (25%)", self, shortcut="Ctrl++", enabled=False, triggered=self.zoomIn)
-        self.zoomOutAct = QAction("Zoom &Out (25%)", self, shortcut="Ctrl+-", enabled=False, triggered=self.zoomOut)
-        self.normalSizeAct = QAction("&Normal Size", self, shortcut="Ctrl+S", enabled=False, triggered=self.normalSize)
+        self.zoomInAct = QAction("Zoom &In (25%)", self, shortcut="Ctrl++", enabled=True, triggered=self.zoomIn)
+        self.zoomOutAct = QAction("Zoom &Out (25%)", self, shortcut="Ctrl+-", enabled=True, triggered=self.zoomOut)
+        self.normalSizeAct = QAction("&Normal Size", self, shortcut="Ctrl+S", enabled=True, triggered=self.normalSize)
+        self.fitToWindowAct = QAction("&Fit to Window", self, enabled=True, checkable=True, shortcut="Ctrl+F",
+                                      triggered=self.fitToWindow)
 #        self.aboutAct = QAction("&About", self, triggered=self.about)
 #        self.aboutQtAct = QAction("About &Qt", self, triggered=qApp.aboutQt)
 
@@ -258,6 +261,8 @@ class LBmain(QMainWindow):
         self.viewMenu.addAction(self.zoomInAct)
         self.viewMenu.addAction(self.zoomOutAct)
         self.viewMenu.addAction(self.normalSizeAct)
+        self.viewMenu.addSeparator()
+        self.viewMenu.addAction(self.fitToWindowAct)
 
 #        self.helpMenu = QMenu("&Help", self)
 #        self.helpMenu.addAction(self.aboutAct)
@@ -292,8 +297,7 @@ class LBmain(QMainWindow):
 
     def scaleImage(self, factor):
         self.scaleFactor *= factor
-        #self.imageLabel.resize(self.scaleFactor * self.imageLabel.size())
-        self.imageLabel.resize(QtCore.QSize(300, 300))
+        self.imageLabel.resize(self.scaleFactor * self.imageLabel.pixmap().size())
 
         self.adjustScrollBar(self.scrollArea.horizontalScrollBar(), factor)
         self.adjustScrollBar(self.scrollArea.verticalScrollBar(), factor)
