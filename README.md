@@ -10,6 +10,12 @@ and functionality to make it easier for users to install and run is planned.
 Changelog
 =========
 
+v0.2.0 (December 31st, 2019)
+----------------------------
+Transitioned over to PyQt5. Can theoretically display up to 16 images from the
+database with click-to-enlarge and zoom functions. GUI layout v1 is mapped out
+but otherwise non-functional.
+
 v0.1.0 (Oct. 3rd, 2019)
 -----------------------
 First vaguely functional build. Implemented simple homebrew database that works
@@ -30,6 +36,9 @@ Big thank you to [acbetter](https://gist.github.com/acbetter) for their
 
 ### Immediate goals:
 
-- Add updating of the tags of a file
+- Add images thru GUI
+- Export images thru GUI
+- Delete images thru GUI
 - More full-featured search
-- Preliminary display of images on search
+- Export tags/metadata/archive thru GUI
+- Add updating of the tags of a file
