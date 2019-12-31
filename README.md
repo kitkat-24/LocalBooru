@@ -1,6 +1,6 @@
 LocalBooru
 ==========
-An application to organize local media files similarly to an image booru.
+An application to organize local media files similarly to an [image booru.](https://tvtropes.org/pmwiki/pmwiki.php/Main/ImageBooru)
 
 Currently is in very early alpha and only works as a clunky CLI program. A GUI
 and functionality to make it easier for users to install and run is planned.
