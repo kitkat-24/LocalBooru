@@ -40,7 +40,7 @@ class LBmain(QMainWindow):
         self.tagBox = QGroupBox('Tags')
         self.tagBox.setFixedWidth(tag_width)
         self.tagList = QExt.TagList()
-        self.tagList.itemClicked.connect(self.tagClicked)
+        self.tagList.itemClicked.connect(self.onTagClick)
 
         tagLayout = QVBoxLayout()
         tagLayout.addWidget(self.tagList, QtCore.Qt.MinimumSize)
@@ -128,7 +128,7 @@ class LBmain(QMainWindow):
 
         self.search_query = QLineEdit()
         search_but = QPushButton('Search', self.topbarFrame)
-        search_but.clicked.connect(self.search)
+        search_but.clicked.connect(self.onSearchBut)
 
         # Add to topbar
         self.topbarLayout.addWidget(add_but)
@@ -140,12 +140,19 @@ class LBmain(QMainWindow):
         self.topbarLayout.setAlignment(QtCore.Qt.AlignVCenter)
 
     @QtCore.pyqtSlot(QListWidgetItem)
-    def tagClicked(self, item):
+    def onTagClick(self, item):
         """Action when an item in the list is clicked.
 
         Usage: listWidget.itemClicked.connect(TagList.Clicked)
         """
-        QMessageBox.information(self, "ListWidget", "You clicked: " + item.text())
+        # Lazy hack
+        args = ['-S', item.text()]
+        search_fids = list(lb.main(args))
+
+        self.displayThumbnails(self.imLayout, search_fids)
+        self.search_query.setText(item.text())
+        # Do unenlarge() last bc it clears self.tagList
+        self.unenlarge()
 
     def scaleImg(self, pix: QPixmap, size: QtCore.QSize):
         """Scale an a QPixmap and maintain aspect ratio."""
@@ -223,7 +230,7 @@ class LBmain(QMainWindow):
         alert.setText('You clicked the delete button!')
         alert.exec_()
 
-    def search(self):
+    def onSearchBut(self):
         """Perform a database search."""
         # Lazy hack
         args = ['-S'] + self.search_query.text().split()
