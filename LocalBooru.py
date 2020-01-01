@@ -142,13 +142,12 @@ def search(tags):
                     results = set(tag_list[tag])
 
     if results:
-        pp.pprint(results)
         return results
     else:
         logging.info('No files tagged with "{}" found.'.format(" ".join(sorted(tags))))
         return None
 
-################################################################################
+#-------------------------------------------------------------------------------
 
 def parse_args(args):
     """

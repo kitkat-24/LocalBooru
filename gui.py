@@ -49,7 +49,8 @@ class LBmain(QMainWindow):
         # Create image display grid widget + layout:
         self.imBox = QGroupBox('Images')
         self.imLayout = QGridLayout()
-        self.displayThumbnails(self.imLayout)
+        search_fids = list(lb.search(None)) # Empty search = return all images
+        self.displayThumbnails(self.imLayout, search_fids)
         self.imBox.setLayout(self.imLayout)
 
         # Create image zoom display
@@ -155,12 +156,13 @@ class LBmain(QMainWindow):
     def createCallback(self, index: int):
         return lambda: self.enlarge(index)
 
-    def displayThumbnails(self, layout):
+    # TODO possible memory leak here not deleting old QPixmaps when updating?
+    def displayThumbnails(self, layout, search_fids):
         """Display grid of thumbnails."""
         cols = int((self.width - 150) / (1.25 * thumbnail_size.width()))
         rows = int((self.height - 150) / (1.25 * thumbnail_size.height()))
 
-        self.search_fids = list(lb.search(None)) # Empty search = return all images
+        self.search_fids = search_fids
         if len(self.search_fids) > 16:
             self.search_fids = random.sample(self.search_fids, 16)
 
@@ -173,6 +175,11 @@ class LBmain(QMainWindow):
             layout.setColumnMinimumWidth(i, thumbnail_size.width())
             layout.setRowMinimumHeight(i, thumbnail_size.height())
             for j in range(cols):
+                # Clear out any previous results
+                if layout.itemAtPosition(i, j):
+                    toRemove = layout.itemAtPosition(i, j).widget()
+                    layout.removeWidget(toRemove)
+                    toRemove.deleteLater()
                 if (count < len(self.search_results)):
                     thumb = QExt.ImgButton(pixmap=self.search_thumbs[count])
                     # We require the createCallback() function to create a new
@@ -218,9 +225,11 @@ class LBmain(QMainWindow):
 
     def search(self):
         """Perform a database search."""
-        alert = QMessageBox()
-        alert.setText('You searched for: {}!'.format(self.search_query.text()))
-        alert.exec_()
+        # Lazy hack
+        args = ['-S'] + self.search_query.text().split()
+        search_fids = list(lb.main(args))
+
+        self.displayThumbnails(self.imLayout, search_fids)
 
     def enlarge(self, index: int):
         """Enlarge the search result thumbnail image."""
