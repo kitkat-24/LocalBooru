@@ -1,14 +1,21 @@
 LocalBooru
 ==========
-An application to organize local media files similarly to an [image booru.](https://tvtropes.org/pmwiki/pmwiki.php/Main/ImageBooru)
+An application to organize local media files similarly to an
+[image booru.](https://tvtropes.org/pmwiki/pmwiki.php/Main/ImageBooru)
 
-Currently is in very early alpha and only works as a clunky CLI program. A GUI
-and functionality to make it easier for users to install and run is planned.
-
+Currently is in early alpha; only half the functionality is implemented in the
+GUI, and the underlying structure will certainly evolve as the project develops.
+Expect the CLI to not keep up with addition of new features to the GUI, and
+possibly be entirely removed in the future.
 
 
 Changelog
 =========
+
+v0.2.1 (January 1st, 2020)
+--------------------------
+Implemented search, display of image tags when focused on (click-to-enlarge
+mode), and ability to click on a tag to search for all images with said tag.
 
 v0.2.0 (December 31st, 2019)
 ----------------------------
