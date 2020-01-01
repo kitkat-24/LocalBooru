@@ -74,6 +74,21 @@ def add(inputfile, tags):
 
     logging.info(f'Created file "{file_id}"')
 
+def get_tag_list(fids):
+    """Return a list of all tags the given file_ids have. If no file_ids are given, returns all tags in the database.
+
+    :param fids: Collection of file_ids.
+
+    :returns: A set of tags.
+    """
+    file_id_list = fids if fids else file_index.keys()
+    tags = set()
+    for fid in file_id_list:
+        tags = tags | file_index[fid] # Perform set union
+
+    # Remove fid tags from display
+    return {tag for tag in tags if not "fid:" in tag}
+
 def list_tags():
     """List all tags in the database by printing to stdout.
 
@@ -111,7 +126,7 @@ def search(tags):
 
     :param tags: Set of tags to search by.
 
-    :returns: Set of file_ids for files that have all listed tags.
+    :returns: Set of file_ids of files that have all listed tags.
     """
     results = set()
     # If given no tags, just return all files

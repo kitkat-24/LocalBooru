@@ -40,7 +40,6 @@ class LBmain(QMainWindow):
         self.tagBox = QGroupBox('Tags')
         self.tagBox.setFixedWidth(tag_width)
         self.tagList = QExt.TagList()
-        self.addLeftCol()
         self.tagList.itemClicked.connect(self.tagClicked)
 
         tagLayout = QVBoxLayout()
@@ -94,6 +93,8 @@ class LBmain(QMainWindow):
         # Done
         self.show()
 
+
+
     #---------------------------------------------------------------------------
     # Section creation functions
     #---------------------------------------------------------------------------
@@ -136,11 +137,6 @@ class LBmain(QMainWindow):
         self.topbarLayout.addWidget(search_but)
 
         self.topbarLayout.setAlignment(QtCore.Qt.AlignVCenter)
-
-    def addLeftCol(self):
-        """Populate the left column with tags."""
-        for i in range(7):
-            self.tagList.addItem(f'bs tag {i}')
 
     @QtCore.pyqtSlot(QListWidgetItem)
     def tagClicked(self, item):
@@ -190,9 +186,18 @@ class LBmain(QMainWindow):
                 count += 1
 
 
+
+    #---------------------------------------------------------------------------
+    # Update functions
+    #---------------------------------------------------------------------------
+
+
+
+
     #---------------------------------------------------------------------------
     # Button functions
     #---------------------------------------------------------------------------
+
     def add_dialogue(self):
         """Begin dialogue to add an image to the database."""
         alert = QMessageBox()
@@ -222,6 +227,9 @@ class LBmain(QMainWindow):
         self.imBox.hide()
         self.imZoomBox.show()
         self.imageLabel.setPixmap(self.search_results[index])
+        file_tags = list(lb.get_tag_list([self.search_fids[index]]))
+        file_tags.sort()
+        self.tagList.updateTags(file_tags)
         self.scaleFactor = 1.0
 
         # Hack to make starting fitted to window work
@@ -230,6 +238,7 @@ class LBmain(QMainWindow):
 
     def unenlarge(self):
         """Shrink the focused image and return to search results."""
+        self.tagList.clear()
         self.imZoomBox.hide()
         self.imBox.show()
 
@@ -238,25 +247,15 @@ class LBmain(QMainWindow):
     #---------------------------------------------------------------------------
     # Image stuff
     #---------------------------------------------------------------------------
+
     def createActions(self):
-#        self.openAct = QAction("&Open...", self, shortcut="Ctrl+O", triggered=self.open)
-#        self.printAct = QAction("&Print...", self, shortcut="Ctrl+P", enabled=False, triggered=self.print_)
-#        self.exitAct = QAction("E&xit", self, shortcut="Ctrl+Q", triggered=self.close)
         self.zoomInAct = QAction("Zoom &In (25%)", self, shortcut="Ctrl++", enabled=True, triggered=self.zoomIn)
         self.zoomOutAct = QAction("Zoom &Out (25%)", self, shortcut="Ctrl+-", enabled=True, triggered=self.zoomOut)
         self.normalSizeAct = QAction("&Normal Size", self, shortcut="Ctrl+S", enabled=True, triggered=self.normalSize)
         self.fitToWindowAct = QAction("&Fit to Window", self, enabled=True, checkable=True, shortcut="Ctrl+F",
                                       triggered=self.fitToWindow)
-#        self.aboutAct = QAction("&About", self, triggered=self.about)
-#        self.aboutQtAct = QAction("About &Qt", self, triggered=qApp.aboutQt)
 
     def createMenus(self):
-#        self.fileMenu = QMenu("&File", self)
-#        self.fileMenu.addAction(self.openAct)
-#        self.fileMenu.addAction(self.printAct)
-#        self.fileMenu.addSeparator()
-#        self.fileMenu.addAction(self.exitAct)
-
         self.viewMenu = QMenu("&View", self)
         self.viewMenu.addAction(self.zoomInAct)
         self.viewMenu.addAction(self.zoomOutAct)
@@ -264,13 +263,7 @@ class LBmain(QMainWindow):
         self.viewMenu.addSeparator()
         self.viewMenu.addAction(self.fitToWindowAct)
 
-#        self.helpMenu = QMenu("&Help", self)
-#        self.helpMenu.addAction(self.aboutAct)
-#        self.helpMenu.addAction(self.aboutQtAct)
-
-#        self.menuBar().addMenu(self.fileMenu)
         self.menuBar().addMenu(self.viewMenu)
-#        self.menuBar().addMenu(self.helpMenu)
 
     def zoomIn(self):
         self.scaleImage(1.25)
@@ -306,8 +299,7 @@ class LBmain(QMainWindow):
         self.zoomOutAct.setEnabled(self.scaleFactor > 0.25)
 
     def adjustScrollBar(self, scrollBar, factor):
-        scrollBar.setValue(int(factor * scrollBar.value()
-                               + ((factor - 1) * scrollBar.pageStep() / 2)))
+        scrollBar.setValue(int(factor * scrollBar.value() + ((factor - 1) * scrollBar.pageStep() / 2)))
 
 
 

@@ -59,3 +59,10 @@ class ImageLabel(QLabel):
 class TagList(QListWidget):
     def __init__(self, parent=None):
         super(QListWidget, self).__init__(parent)
+
+    def updateTags(self, tags):
+        """Update the tags displayed in the lefthand column."""
+        self.clear()
+        if tags:
+            for t in tags:
+                self.addItem(t)
