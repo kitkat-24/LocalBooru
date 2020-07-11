@@ -76,7 +76,7 @@ class AddFileDialog(QDialog):
         super().__init__(parent)
 
         self.artist = QLineEdit(self)
-        self.character = QLineEdit(self)
+        self.characters = QLineEdit(self)
         self.rating = QLineEdit(self)
         self.series = QLineEdit(self)
         self.tags = QLineEdit(self)
@@ -84,7 +84,7 @@ class AddFileDialog(QDialog):
 
         layout = QFormLayout(self)
         layout.addRow('Artist', self.artist)
-        layout.addRow('Character', self.character)
+        layout.addRow('Characters', self.characters)
         layout.addRow('Rating', self.rating)
         layout.addRow('Series', self.series)
         layout.addRow('Tags', self.tags)
@@ -97,13 +97,17 @@ class AddFileDialog(QDialog):
         string = ''
         if self.artist.text():
             string += '-a ' + self.artist.text()
-        if self.character.text():
-            string += '-c ' + self.character.text()
+        if self.characters.text():
+            chars = self.characters.text().split()
+            for c in chars:
+                string += '-c ' + c
         if self.rating.text():
             string += '-r ' + self.rating.text()
         if self.series.text():
-            string += '-s ' + self.series.text()
-        if self.tag.text():
-            string += self.tag.text()
+            ss = self.series.text().split()
+            for s in ss:
+                string += '-s ' + s
+        if self.tags.text():
+            string += self.tags.text()
 
         return string

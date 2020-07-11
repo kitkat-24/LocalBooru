@@ -1,3 +1,6 @@
+# Main GUI module for LocalBooru.
+# Katerina R, July 2020
+
 import sys
 from collections import namedtuple
 from PyQt5 import QtWidgets
@@ -7,7 +10,7 @@ from PyQt5 import QtCore
 import random
 
 import LocalBooru as lb
-import QtExtensions as QExt
+import LBQtExtensions as QExt
 
 thumbnail_size = QtCore.QSize(150, 150)
 tag_width = 150
@@ -220,11 +223,13 @@ class LBmain(QMainWindow):
                 )
 
         # Parse inputs
+        inputParser = QExt.AddFileDialog()
+        if inputParser.exec():
+            tags = inputParser.getFileParams()
 
-        # Call LocalBooru functions
-        # Add up arguments
-        args = ['-A']
-        lb.main(args) # Actually make library call to add the file
+        # Only add file if given at least one tag
+        if tags:
+            lb.main(tags) # Actually make library call to add the file
 
     def share_dialogue(self):
         """Begin dialogue to export an image from the database."""
@@ -241,7 +246,10 @@ class LBmain(QMainWindow):
     def onSearchBut(self):
         """Perform a database search."""
         # Lazy hack
-        args = ['-S'] + self.search_query.text().split()
+        if self.search_query.text():
+            args = ['-S'] + self.search_query.text().split()
+        else:
+            args = ['-S']
         search_fids = list(lb.main(args))
 
         self.displayThumbnails(self.imLayout, search_fids)
