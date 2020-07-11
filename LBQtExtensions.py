@@ -69,3 +69,41 @@ class TagList(QListWidget):
         if tags:
             for t in tags:
                 self.addItem(t)
+
+
+class AddFileDialog(QDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+        self.artist = QLineEdit(self)
+        self.character = QLineEdit(self)
+        self.rating = QLineEdit(self)
+        self.series = QLineEdit(self)
+        self.tags = QLineEdit(self)
+        buttonBox = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel, self);
+
+        layout = QFormLayout(self)
+        layout.addRow('Artist', self.artist)
+        layout.addRow('Character', self.character)
+        layout.addRow('Rating', self.rating)
+        layout.addRow('Series', self.series)
+        layout.addRow('Tags', self.tags)
+        layout.addWidget(buttonBox)
+
+        buttonBox.accepted.connect(self.accept)
+        buttonBox.rejected.connect(self.reject)
+
+    def getFileParams(self):
+        string = ''
+        if self.artist.text():
+            string += '-a ' + self.artist.text()
+        if self.character.text():
+            string += '-c ' + self.character.text()
+        if self.rating.text():
+            string += '-r ' + self.rating.text()
+        if self.series.text():
+            string += '-s ' + self.series.text()
+        if self.tag.text():
+            string += self.tag.text()
+
+        return string

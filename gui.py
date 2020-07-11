@@ -214,9 +214,17 @@ class LBmain(QMainWindow):
 
     def add_dialogue(self):
         """Begin dialogue to add an image to the database."""
-        alert = QMessageBox()
-        alert.setText('You clicked the add button!')
-        alert.exec_()
+        fileName, _ = QFileDialog.getOpenFileName(
+                self, caption='Add Image',
+                filter='Image Files (*.png *.jpg *.bmp)'
+                )
+
+        # Parse inputs
+
+        # Call LocalBooru functions
+        # Add up arguments
+        args = ['-A']
+        lb.main(args) # Actually make library call to add the file
 
     def share_dialogue(self):
         """Begin dialogue to export an image from the database."""
