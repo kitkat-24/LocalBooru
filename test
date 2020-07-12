@@ -1,0 +1,19 @@
+#import os, sys
+#
+#scriptpath = '../.'
+#
+## Add the directory containing your module to the Python path (wants absolute paths)
+#sys.path.append(os.path.abspath(scriptpath))
+#
+## Do the import
+#from LocalBooru import parse_args
+
+import LocalBooru as LB
+
+
+args = ['-a', 'Katerina', '-c', 'Kat', 'albanian', 'OC', 'sword']
+operation, tags, filename, fid = LB.parse_args(args)
+print(operation)
+print(tags)
+print(filename)
+print(fid)

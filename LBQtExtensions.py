@@ -94,20 +94,22 @@ class AddFileDialog(QDialog):
         buttonBox.rejected.connect(self.reject)
 
     def getFileParams(self):
-        string = ''
+        """Returns a list of tags based on the input dialog (formatted for
+        convenience to use with LocalBooru.py)."""
+        params = []
         if self.artist.text():
-            string += '-a ' + self.artist.text()
+            params += ['-a', self.artist.text()]
         if self.characters.text():
             chars = self.characters.text().split()
             for c in chars:
-                string += '-c ' + c
+                params += ['-c', c]
         if self.rating.text():
-            string += '-r ' + self.rating.text()
+            params += ['-r', self.rating.text()]
         if self.series.text():
             ss = self.series.text().split()
             for s in ss:
-                string += '-s ' + s
+                params += ['-s', s]
         if self.tags.text():
-            string += self.tags.text()
+            params += self.tags.text().split()
 
-        return string
+        return params

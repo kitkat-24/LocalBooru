@@ -229,7 +229,8 @@ class LBmain(QMainWindow):
 
         # Only add file if given at least one tag
         if tags:
-            lb.main(tags) # Actually make library call to add the file
+            args = ['-A', fileName] + tags
+            lb.main(args) # Actually make library call to add the file
 
     def share_dialogue(self):
         """Begin dialogue to export an image from the database."""
