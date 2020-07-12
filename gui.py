@@ -222,15 +222,17 @@ class LBmain(QMainWindow):
                 filter='Image Files (*.png *.jpg *.bmp)'
                 )
 
-        # Parse inputs
-        inputParser = QExt.AddFileDialog()
-        if inputParser.exec():
-            tags = inputParser.getFileParams()
+        # Parse inputs if file selected
+        if fileName:
+            inputParser = QExt.AddFileDialog()
+            tags = []
+            if inputParser.exec():
+                tags = inputParser.getFileParams()
 
-        # Only add file if given at least one tag
-        if tags:
-            args = ['-A', fileName] + tags
-            lb.main(args) # Actually make library call to add the file
+            # Only add file if given at least one tag
+            if tags:
+                args = ['-A', fileName] + tags
+                lb.main(args) # Actually make library call to add the file
 
     def share_dialogue(self):
         """Begin dialogue to export an image from the database."""

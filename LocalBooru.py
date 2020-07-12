@@ -142,7 +142,6 @@ def search(tags):
                     results = set(tag_list[tag])
 
     if results:
-        logging.info('{}.'.format(results))
         return results
     else:
         logging.info('No files tagged with "{}" found.'.format(" ".join(sorted(tags))))
