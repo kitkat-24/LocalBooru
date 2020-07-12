@@ -263,6 +263,15 @@ class LBmain(QMainWindow):
 
     def onTagEditBut(self):
         """Edit tags for the selected image."""
+        old_tags = self.tagList.list_of_tags
+        tagUpdater = QExt.EditTagDialog(tags=old_tags, parent=self)
+        if tagUpdater.exec_():
+            old_tags = set(old_tags)
+            updated_tags = tagUpdater.getUpdatedTags()
+
+            if updated_tags != old_tags:
+                lb.update_tags(self.current_fid, updated_tags)
+                self.tagList.updateTags(list(updated_tags).sort())
 
 
     def enlarge(self, index: int):

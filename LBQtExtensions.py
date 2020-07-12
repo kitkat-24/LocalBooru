@@ -1,6 +1,8 @@
 # Custom PyQt5 classes for the LocalBooru GUI
 # Katerina R, July 2020
 
+import re
+
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import QPainter
 from PyQt5 import QtCore
@@ -62,13 +64,37 @@ class ImageLabel(QLabel):
 class TagList(QListWidget):
     def __init__(self, parent=None):
         super(QListWidget, self).__init__(parent)
+        self.list_of_tags = []
 
+    # TODO tags will not show up until you exit zoom view then re-enter it
     def updateTags(self, tags):
         """Update the tags displayed in the lefthand column."""
         self.clear()
+        self.list_of_tags = tags
         if tags:
             for t in tags:
                 self.addItem(t)
+            for i in range(self.count()):
+                self.item(i).setHidden(False)
+
+
+class EditTagDialog(QDialog):
+    def __init__(self, tags, parent=None):
+        super().__init__(parent)
+
+        layout = QVBoxLayout(self)
+        tag_list = '; '.join(tags)
+        self.tagBox = QTextEdit(tag_list, parent=self)
+        buttonBox = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel, self);
+        layout.addWidget(self.tagBox)
+        layout.addWidget(buttonBox)
+
+        buttonBox.accepted.connect(self.accept)
+        buttonBox.rejected.connect(self.reject)
+
+    def getUpdatedTags(self):
+        """Returns the updated tags as a set."""
+        return set(re.split('[;\s]+', self.tagBox.toPlainText().strip()))
 
 
 class AddFileDialog(QDialog):

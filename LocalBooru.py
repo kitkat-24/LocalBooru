@@ -55,14 +55,16 @@ except FileNotFoundError:
 # Helper Methods                                                               #
 ################################################################################
 
+# TODO why is tag_list a dict(tag:list) instead of dict(tag:set)? O(n) searches
+# could get bad to remove popular tags
 def add_tags_to_file(fid, tags):
     """Add a set of tags to a file. The tags are assumed to be unique to the
     file."""
     for tag in tags:
         if tag in tag_list:
-            tag_list[tag].append(file_id)
+            tag_list[tag].append(fid)
         else:
-            tag_list[tag] = [file_id]
+            tag_list[tag] = [fid]
 
 def remove_tags_from_file(fid, tags):
     """Remove a set of tags from a file. The tags are assumed to be actually
@@ -121,9 +123,9 @@ def update_tags(fid, new_tags):
     old_tags = get_tags([fid])
     add_tags_to_file(fid, new_tags - old_tags)
     remove_tags_from_file(fid, old_tags - new_tags)
-    file_index[file_id] = new_tags
+    file_index[fid] = new_tags
 
-    logging.info(f'Updated tags of file "{file_id}"')
+    logging.info(f'Updated tags of file "{fid}"')
 
 def list_tags():
     """List all tags in the database by printing to stdout.
