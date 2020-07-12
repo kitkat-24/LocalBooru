@@ -73,9 +73,9 @@ Big thank you to [acbetter](https://gist.github.com/acbetter) for their
 
 ### Immediate goals:
 
-- Add images thru GUI
-- Export images thru GUI
-- Delete images thru GUI
-- More full-featured search
-- Export tags/metadata/archive thru GUI
-- Add updating of the tags of a file
+- [x] Add images thru GUI
+- [ ] Export images thru GUI
+- [ ] Delete images thru GUI
+- [ ] More full-featured search
+- [ ] Export tags/metadata/archive thru GUI
+- [x] Add updating of the tags of a file
