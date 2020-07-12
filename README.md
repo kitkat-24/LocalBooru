@@ -34,6 +34,10 @@ must be separated by whitespace and/or a semicolon.
 
 Changelog
 =========
+v0.2.3 (July 12th, 2020)
+------------------------
+Implemented updating image tags.
+
 v0.2.2 (July 11th, 2020)
 ------------------------
 Implemented adding images through the GUI.

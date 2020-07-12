@@ -137,7 +137,7 @@ def list_tags():
         if not 'fid:' in tag:
             print('{}: {}'.format(tag, len(tag_list[tag])))
 
-def remove(fid):
+def remove_file(fid):
     """Remove an image from the database. If the file is not in the database,
     the method does nothing.
 
@@ -244,14 +244,14 @@ def call_operation(operation, tags, filename='', fid=''):
     """
     if operation == 'add':
         if filename:
-            return add(filename, tags)
+            return add_file(filename, tags)
         else:
             print('Invalid filename specified.')
             sys.exit(2)
     elif operation == 'list':
         return list_tags()
     elif operation == 'remove':
-        return remove(fid)
+        return remove_file(fid)
     elif operation == 'search':
         return search(tags)
 
