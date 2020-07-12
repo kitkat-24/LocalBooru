@@ -26,6 +26,11 @@ Once opened, a dialog will open to allow the user to enter tags. If none are
 given, the program will not add the file because we don't want un-tagged files
 disappearing in the database but taking up space.
 
+Editing Tags
+------------
+Press the edit tag button in the bottom left while an image is enlarged. Tags
+must be separated by whitespace and/or a semicolon.
+
 
 Changelog
 =========

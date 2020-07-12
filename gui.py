@@ -271,7 +271,15 @@ class LBmain(QMainWindow):
 
             if updated_tags != old_tags:
                 lb.update_tags(self.current_fid, updated_tags)
-                self.tagList.updateTags(list(updated_tags).sort())
+                self.tagList.clear()
+                # Remember: sort() is in place and returns nothing, so you
+                # can't put list(updated_tags).sort() inside the call to
+                # taglist.updateTags() bc it will operate on the null return
+                # value.
+                updated_tags = list(updated_tags)
+                updated_tags.sort()
+                self.tagList.updateTags(updated_tags)
+                self.tagList.show()
 
 
     def enlarge(self, index: int):
@@ -280,6 +288,9 @@ class LBmain(QMainWindow):
         self.imZoomBox.show()
         self.imageLabel.setPixmap(self.search_results[index])
         self.current_fid = self.search_fids[index]
+        # Remember: sort() is in place and returns nothing, so you can't put
+        # list(lb.get_tags(...)).sort() inside the call to taglist.updateTags()
+        # bc it will operate on the null return value.
         file_tags = list(lb.get_tags([self.current_fid]))
         file_tags.sort()
         self.tagList.updateTags(file_tags)
