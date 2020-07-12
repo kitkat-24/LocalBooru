@@ -45,8 +45,12 @@ class LBmain(QMainWindow):
         self.tagList = QExt.TagList()
         self.tagList.itemClicked.connect(self.onTagClick)
 
+        self.tagEditButton = QPushButton('Edit Tags')
+        self.tagEditButton.clicked.connect(self.onTagEditBut)
+
         tagLayout = QVBoxLayout()
         tagLayout.addWidget(self.tagList, QtCore.Qt.MinimumSize)
+        tagLayout.addWidget(self.tagEditButton, QtCore.Qt.MinimumSize)
         self.tagBox.setLayout(tagLayout)
 
         # Create image display grid widget + layout:
@@ -257,12 +261,17 @@ class LBmain(QMainWindow):
 
         self.displayThumbnails(self.imLayout, search_fids)
 
+    def onTagEditBut(self):
+        """Edit tags for the selected image."""
+
+
     def enlarge(self, index: int):
         """Enlarge the search result thumbnail image."""
         self.imBox.hide()
         self.imZoomBox.show()
         self.imageLabel.setPixmap(self.search_results[index])
-        file_tags = list(lb.get_tag_list([self.search_fids[index]]))
+        self.current_fid = self.search_fids[index]
+        file_tags = list(lb.get_tags([self.current_fid]))
         file_tags.sort()
         self.tagList.updateTags(file_tags)
         self.scaleFactor = 1.0

@@ -52,8 +52,33 @@ except FileNotFoundError:
     logging.info('tag_list not found. Created new one.')
 
 ################################################################################
+# Helper Methods                                                               #
+################################################################################
 
-def add(inputfile, tags):
+def add_tags_to_file(fid, tags):
+    """Add a set of tags to a file. The tags are assumed to be unique to the
+    file."""
+    for tag in tags:
+        if tag in tag_list:
+            tag_list[tag].append(file_id)
+        else:
+            tag_list[tag] = [file_id]
+
+def remove_tags_from_file(fid, tags):
+    """Remove a set of tags from a file. The tags are assumed to be actually
+    present for the given file."""
+    for tag in tags:
+        tag_list[tag].remove(fid)
+        # If the image was the last one with the given tag, purge the tag
+        # from the database.
+        if not tag_list[tag]:
+            del tag_list[tag]
+
+################################################################################
+# Core Methods                                                                 #
+################################################################################
+
+def add_file(inputfile, tags):
     """Add a file to the database.
 
     :param inputfile: Path to file to add.
@@ -66,16 +91,13 @@ def add(inputfile, tags):
 
     tags.add(f'fid:{file_id}')
     file_index[file_id] = tags
-    for tag in tags:
-        if tag in tag_list:
-            tag_list[tag].append(file_id)
-        else:
-            tag_list[tag] = [file_id]
+    add_tags_to_file(file_id, tags)
 
     logging.info(f'Created file "{file_id}"')
 
-def get_tag_list(fids):
-    """Return a list of all tags the given file_ids have. If no file_ids are given, returns all tags in the database.
+def get_tags(fids):
+    """Return a set of all tags the given file_ids have. If no file_ids are
+    given, returns all tags in the database.
 
     :param fids: Collection of file_ids.
 
@@ -88,6 +110,20 @@ def get_tag_list(fids):
 
     # Remove fid tags from display
     return {tag for tag in tags if not "fid:" in tag}
+
+def update_tags(fid, new_tags):
+    """For the given file, update its tags and the database as a whole.
+
+    :param fid: File_id of the file to update.
+    :param new_tags: A set of tags.
+    """
+    # We use the set difference operation to handle this cleanly
+    old_tags = get_tags([fid])
+    add_tags_to_file(fid, new_tags - old_tags)
+    remove_tags_from_file(fid, old_tags - new_tags)
+    file_index[file_id] = new_tags
+
+    logging.info(f'Updated tags of file "{file_id}"')
 
 def list_tags():
     """List all tags in the database by printing to stdout.
@@ -112,12 +148,7 @@ def remove(fid):
     if rm_tags:
         logging.info('Removing file "{}".'.format(fid))
         os.remove(f'data/{fid}')
-        for tag in rm_tags:
-            tag_list[tag].remove(fid)
-            # If the image was the last one with the given tag, purge the tag
-            # from the database.
-            if not tag_list[tag]:
-                del tag_list[tag]
+        remove_tags_from_file(fid, rm_tags)
     else:
         logging.info('File "{}" not found.'.format(fid))
 
