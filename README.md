@@ -9,8 +9,29 @@ Expect the CLI to not keep up with addition of new features to the GUI, and
 possibly be entirely removed in the future.
 
 
+GUI Manual
+==========
+Search
+------
+Searching is performed through the searchbar at the top with tags separated by
+spaces. Currently search only displays images matching all tags entered. Meta
+tags (such as artist or character can be entered directly (e.g.
+"artist:Picasso") or in the format used on the commandline (e.g. "-a Picasso").
+
+Adding Files
+------------
+Files are added through the plus button in the top left, which will open the
+native file browser as a dialog to select (currently only) one file at a time.
+Once opened, a dialog will open to allow the user to enter tags. If none are
+given, the program will not add the file because we don't want un-tagged files
+disappearing in the database but taking up space.
+
+
 Changelog
 =========
+v0.2.2 (July 11th, 2020)
+------------------------
+Implemented adding images through the GUI.
 
 v0.2.1 (January 1st, 2020)
 --------------------------
