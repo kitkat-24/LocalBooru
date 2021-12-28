@@ -12,8 +12,9 @@ import random
 import LocalBooru as lb
 import LBQtExtensions as QExt
 
-thumbnail_size = QtCore.QSize(150, 150)
-tag_width = 150
+thumbnail_size = QtCore.QSize(240, 240)
+thumbnail_padding_factor = 1.12
+tag_width = 250
 icon_path = './basic-ui-icons/SVGs/'
 menu_icon_size = QtCore.QSize(64, 64)
 
@@ -173,12 +174,13 @@ class LBmain(QMainWindow):
     # TODO possible memory leak here not deleting old QPixmaps when updating?
     def displayThumbnails(self, layout, search_fids):
         """Display grid of thumbnails."""
-        cols = int((self.width - 150) / (1.25 * thumbnail_size.width()))
-        rows = int((self.height - 150) / (1.25 * thumbnail_size.height()))
+        cols = int((self.width - tag_width) / (thumbnail_padding_factor * thumbnail_size.width()))
+        rows = int((self.height - tag_width) / (thumbnail_padding_factor * thumbnail_size.height()))
+        n_pic = cols * rows
 
         self.search_fids = search_fids
-        if len(self.search_fids) > 16:
-            self.search_fids = random.sample(self.search_fids, 16)
+        if len(self.search_fids) > n_pic:
+            self.search_fids = random.sample(self.search_fids, n_pic)
 
         self.search_results = [QPixmap('data/' + f) for f in self.search_fids]
         self.search_thumbs = [self.scaleImg(p, thumbnail_size) for p in self.search_results]
@@ -203,7 +205,7 @@ class LBmain(QMainWindow):
                     thumb = QLabel()
                     thumb.hide()
 
-                layout.addWidget(thumb, i, j)
+                layout.addWidget(thumb, i, j, alignment=QtCore.Qt.AlignCenter)
                 count += 1
 
 
