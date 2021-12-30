@@ -19,6 +19,7 @@ icon_path = './basic-ui-icons/SVGs/'
 menu_icon_size = QtCore.QSize(64, 64)
 
 
+
 class LBmain(QMainWindow):
     def __init__(self, qapp):
         super().__init__()
@@ -63,7 +64,7 @@ class LBmain(QMainWindow):
 
         # Create image zoom display
         self.imZoomBox = QGroupBox('Image')
-        self.imZoomLayout = QVBoxLayout()
+        self.imZoomLayout = QVBoxLayout(alignment=QtCore.Qt.AlignCenter)
 
         self.imageLabel = QExt.ImageLabel(onClick=self.unenlarge)
         self.scrollArea = QScrollArea()
@@ -223,22 +224,28 @@ class LBmain(QMainWindow):
 
     def add_dialogue(self):
         """Begin dialogue to add an image to the database."""
-        fileName, _ = QFileDialog.getOpenFileName(
-                self, caption='Add Image',
-                filter='Image Files (*.png *.jpg *.bmp)'
-                )
+        filenames, _ = QFileDialog.getOpenFileNames(
+            self, caption='Add Image',
+            filter='Image Files (*.png *.jpg *.bmp)'
+        )
 
-        # Parse inputs if file selected
-        if fileName:
-            inputParser = QExt.AddFileDialog()
+
+        # Parse inputs if file(s) selected
+        if len(filenames) > 0:
+            inputParser = QExt.AddFileDialog(self, len(filenames)>1)
             tags = []
             if inputParser.exec():
                 tags = inputParser.getFileParams()
 
             # Only add file if given at least one tag
             if tags:
-                args = ['-A', fileName] + tags
-                lb.main(args) # Actually make library call to add the file
+                for filename in filenames:
+                    args = ['-A', filename] + tags
+                    lb.main(args) # Actually make library call to add the file
+            else:
+                alert = QMessageBox()
+                alert.setText('Cannot add un-tagged image(s)!')
+                alert.exec_()
 
     def share_dialogue(self):
         """Begin dialogue to export an image from the database."""

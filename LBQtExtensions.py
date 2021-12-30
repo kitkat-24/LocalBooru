@@ -98,7 +98,7 @@ class EditTagDialog(QDialog):
 
 
 class AddFileDialog(QDialog):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, multiImage=False):
         super().__init__(parent)
 
         self.artist = QLineEdit(self)
@@ -107,6 +107,9 @@ class AddFileDialog(QDialog):
         self.series = QLineEdit(self)
         self.tags = QLineEdit(self)
         buttonBox = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel, self);
+
+        if multiImage:
+            buttonBox.setWindowTitle('Note: Tags will apply to ALL images')
 
         layout = QFormLayout(self)
         layout.addRow('Artist', self.artist)
